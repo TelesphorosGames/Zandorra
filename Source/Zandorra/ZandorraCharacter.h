@@ -1,11 +1,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InteractWithCrosshairs.h"
 #include "GameFramework/Character.h"
 #include "ZandorraCharacter.generated.h"
 
 UCLASS(config=Game)
-class AZandorraCharacter : public ACharacter
+class AZandorraCharacter : public ACharacter, public IInteractWithCrosshairs
 {
 	GENERATED_BODY()
 

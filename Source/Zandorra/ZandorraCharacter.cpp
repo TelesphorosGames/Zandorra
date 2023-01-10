@@ -45,6 +45,9 @@ AZandorraCharacter::AZandorraCharacter()
 	FollowCamera->SetFieldOfView(DefaultFOV);
 	
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
+
+	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 	
 }
 

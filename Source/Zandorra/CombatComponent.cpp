@@ -41,6 +41,8 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	SetHudCrosshairs(DeltaTime);
+	FHitResult HitResult;
+	TraceUnderCrosshairs(HitResult);
 }
 
 void UCombatComponent::FireWeapon()
@@ -104,6 +106,8 @@ void UCombatComponent::SetHudCrosshairs(float DeltaTime)
 
 void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 {
+	if(!ZPlayerController || !ZCharacter) return;
+	
 	FVector2D ViewportSize;
 
 	if(GEngine && GEngine->GameViewport)
@@ -140,12 +144,11 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 			Start,
 			End,
 			ECollisionChannel::ECC_Visibility
-			
 			);
 
 		if(TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairs>())
 		{
-			if(ZHud ==nullptr)
+			if(ZHud == nullptr)
 			{
 				ZHud = Cast<AZandorraHud>(ZPlayerController->GetHUD());
 			}
@@ -157,7 +160,14 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		}
 		else
 		{
-			CrosshairsColor = FLinearColor::White;
+			if(ZHud == nullptr)
+			{
+				ZHud = Cast<AZandorraHud>(ZPlayerController->GetHUD());
+			}
+			if(ZHud)
+			{
+				ZHud->SetCrosshairsColor(FLinearColor::White);
+			}
 			CrosshairTargetFactor = 0.f;
 		}
 
