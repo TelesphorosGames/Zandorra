@@ -9,6 +9,7 @@
 #include "ZandorraPlayerController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Zandorra.h"
 
 
 UCombatComponent::UCombatComponent()
@@ -139,11 +140,13 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		
 		const FVector End = Start + CrosshairWorldDirection * 5'000;
 
+	
 		GetWorld()->LineTraceSingleByChannel(
 			TraceHitResult,
 			Start,
 			End,
-			ECollisionChannel::ECC_Visibility
+			ECC_Visibility
+		
 			);
 
 		if(TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairs>())
