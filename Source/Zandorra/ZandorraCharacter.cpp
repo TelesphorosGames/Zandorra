@@ -137,20 +137,16 @@ void AZandorraCharacter::FireButtonPressed()
 {
 	if(CombatComponent)
 	{
-		CombatComponent->FireWeapon();
-	}
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	
-	if(AttackMontage && AnimInstance)
-	{
-		AnimInstance->Montage_Play(AttackMontage);
-		AnimInstance->Montage_JumpToSection("Fast");
+		CombatComponent->FireWeaponPressed(true);
 	}
 }
 
 void AZandorraCharacter::FireButtonReleased()
 {
-	
+	if(CombatComponent)
+	{
+		CombatComponent->FireWeaponPressed(false);
+	}
 }
 
 void AZandorraCharacter::InterpFOV(float DeltaTime)

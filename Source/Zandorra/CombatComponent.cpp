@@ -4,12 +4,15 @@
 #include "CombatComponent.h"
 
 #include "InteractWithCrosshairs.h"
+#include "Projectile.h"
 #include "ZandorraCharacter.h"
 #include "ZandorraHud.h"
 #include "ZandorraPlayerController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Zandorra.h"
+#include "Animation/AnimInstance.h"
+#include "Engine/SkeletalMeshSocket.h"
 
 
 UCombatComponent::UCombatComponent()
@@ -46,16 +49,10 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	TraceUnderCrosshairs(HitResult);
 }
 
-void UCombatComponent::FireWeapon()
-{
-	
-}
-
 void UCombatComponent::SetAiming(bool bAimSetTo)
 {
 	bIsAiming = bAimSetTo;
 }
-
 
 void UCombatComponent::SetHudCrosshairs(float DeltaTime)
 {
@@ -177,16 +174,90 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		if (!TraceHitResult.bBlockingHit)
 		{
 			TraceHitResult.ImpactPoint = End;
-			
 		}
-		else
-		{
 		
-		}
+		CrosshairsTarget = End;
 	}
 	else
 	{
 		
 	}	
+}
+
+
+void UCombatComponent::FireWeaponPressed(bool bPressed)
+{
+	bFireButtonPressed = bPressed;
+	if(CanFireWeapon())
+	{
+		bCanFire = false;
+		StartFireTimer();
+
+	
+		
+		const USkeletalMeshSocket* BarrelSocket = ZCharacter->GetMesh()->GetSocketByName("Barrel");
+		if(BarrelSocket)
+		{
+			const FTransform SocketTransform = BarrelSocket->GetSocketTransform(ZCharacter->GetMesh());
+			FVector BarrelEnd = SocketTransform.GetLocation() + (SocketTransform.GetUnitAxis(EAxis::X));
+			CrosshairsTarget = BarrelEnd;
+		}
+		
+		LaunchProjectile(CrosshairsTarget);
+		UAnimInstance* AnimInstance = ZCharacter->GetMesh()->GetAnimInstance();
+	
+		if(ZCharacter->GetAttackMontage() && AnimInstance)
+		{
+			AnimInstance->Montage_Play(ZCharacter->GetAttackMontage());
+			AnimInstance->Montage_JumpToSection("Fast");
+		}
+	}
+	
+}
+
+
+void UCombatComponent::LaunchProjectile(const FVector& HitTarget)
+{
+	if(ZCharacter)
+	{
+		UWorld* World = GetWorld();
+		
+		const USkeletalMeshSocket* BarrelSocket = ZCharacter->GetMesh()->GetSocketByName("Barrel");
+		if(BarrelSocket && World)
+		{
+			const FTransform SocketTransform = BarrelSocket->GetSocketTransform(ZCharacter->GetMesh());
+            
+			// Muzzle socket to hit location from Trace Under Crosshairs
+			const FVector ToTarget = HitTarget - SocketTransform.GetLocation();
+			const FRotator TargetRotation = ToTarget.Rotation();
+            
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = GetOwner();
+            
+			AProjectile* SpawnedProjectile = World->SpawnActor<AProjectile>(ProjectileClass, SocketTransform.GetLocation(), TargetRotation, SpawnParams);
+
+		}
+		
+
+	}
+	
+}
+
+bool UCombatComponent::CanFireWeapon()
+{
+	return bCanFire;
+}
+
+void UCombatComponent::StartFireTimer()
+{
+	if(ZCharacter)
+	{
+		ZCharacter->GetWorldTimerManager().SetTimer(FireWeaponTimer, this, &UCombatComponent::FireTimerFinished, WeaponFireDelay);
+	}
+}
+
+void UCombatComponent::FireTimerFinished()
+{
+	bCanFire = true;
 }
 

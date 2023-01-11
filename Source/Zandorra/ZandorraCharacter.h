@@ -35,6 +35,7 @@ public:
 	 */
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	FORCEINLINE class UAnimMontage* GetAttackMontage() const {return AttackMontage; }
 	
 protected:
 
@@ -82,10 +83,10 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float ZoomInterpSpeed =4.f;
 	
-	UPROPERTY()
-	class UCombatComponent* CombatComponent{};
+	UPROPERTY(VisibleAnywhere)
+	class UCombatComponent* CombatComponent;
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"))
-	class UAnimMontage* AttackMontage{};
+	class UAnimMontage* AttackMontage;
 
 	bool bAiming = false;
 

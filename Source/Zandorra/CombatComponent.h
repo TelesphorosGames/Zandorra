@@ -7,6 +7,8 @@
 #include "CombatComponent.generated.h"
 
 
+class AProjectile;
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class ZANDORRA_API UCombatComponent : public UActorComponent
 {
@@ -14,27 +16,32 @@ class ZANDORRA_API UCombatComponent : public UActorComponent
 
 public:	
 
+		UCombatComponent();
 	
 	/* OVERRIDES
 	 */
 	
-	UCombatComponent();
+
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	/* PUBLIC FUNCTIONS
 	 */
-	void FireWeapon();
+	void FireWeaponPressed(bool bPressed);
+
+	
 	
 	/* PUBLIC VARIABLES
 	 */
 	UPROPERTY()
 	class AZandorraCharacter* ZCharacter{};
+	
 		
 	/* GETTERS AND SETTERS
 	 */
 	
 	FORCEINLINE	void SetAiming(bool bAimSetTo);
 
+	
 		
 protected:
 
@@ -66,6 +73,12 @@ private:
 	 */
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 
+	void LaunchProjectile(const FVector& HitTarget);
+	bool CanFireWeapon();
+	void StartFireTimer();
+	void FireTimerFinished();
+	
+
 	/* PRIVATE VARIABLES
 	 */
 	float CrosshairVelocityFactor{};
@@ -78,10 +91,21 @@ private:
 
 	FLinearColor CrosshairsColor;
 
-	
+	bool bFireButtonPressed = false;
+
+	bool bCanFire = true;
+
+	FTimerHandle FireWeaponTimer;
+
+	FVector CrosshairsTarget;
 
 	
+	UPROPERTY(EditAnywhere)
+	float WeaponFireDelay = 4.f;
+	
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AProjectile> ProjectileClass;
 
-
+	
 		
 };

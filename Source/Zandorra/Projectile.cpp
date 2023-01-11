@@ -2,6 +2,7 @@
 
 #include "NiagaraFunctionLibrary.h"
 #include "Components/BoxComponent.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 
@@ -12,6 +13,8 @@ AProjectile::AProjectile()
 
 	CollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionBox"));
 	SetRootComponent(CollisionBox);
+
+	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 
 }
 
@@ -31,6 +34,10 @@ void AProjectile::BeginPlay()
 			GetActorRotation(),
 			EAttachLocation::KeepWorldPosition
 		);
+	}
+	if(BarrelFlashParticles)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BarrelFlashParticles, GetActorLocation(), GetActorRotation());
 	}
 	
 }
