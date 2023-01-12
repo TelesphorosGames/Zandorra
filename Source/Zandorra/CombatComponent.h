@@ -104,6 +104,7 @@ private:
 
 	FTimerHandle FireWeaponTimer;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	FVector CrosshairsTarget;
 
 	

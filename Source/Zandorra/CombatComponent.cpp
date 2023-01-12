@@ -47,6 +47,7 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	SetHudCrosshairs(DeltaTime);
 	FHitResult HitResult;
 	TraceUnderCrosshairs(HitResult);
+	
 }
 
 void UCombatComponent::SetAiming(bool bAimSetTo)
@@ -174,15 +175,18 @@ bool UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		if (!TraceHitResult.bBlockingHit)
 		{
 			TraceHitResult.ImpactPoint = End;
-			
+			CrosshairsTarget = End;
+		}
+		else
+		{
+			CrosshairsTarget = TraceHitResult.ImpactPoint;
 		}
 		
-		CrosshairsTarget = End;
 		return true;
 	}
 	else
 	{
-		
+		CrosshairsTarget =TraceHitResult.TraceEnd;
 	}
 	return false;
 }

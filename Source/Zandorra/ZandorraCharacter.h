@@ -24,10 +24,7 @@ public:
 
 	/* PUBLIC FUNCTIONS
 	 */
-
-	bool GetBeamEndLocation(const FVector &BarrelLocation, FHitResult &OutHitResult);
-
-		
+	
 	/* PUBLIC VARIABLES
 	 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Input)
@@ -36,6 +33,8 @@ public:
 	float MoveForwardAxisValue = 0.f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bUsingBeamAttack = false;
+
+	
 	
 	/* GETTERS AND SETTERS
 	 */
@@ -89,8 +88,10 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float ZoomInterpSpeed =4.f;
 	
-	UPROPERTY(VisibleAnywhere)
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	class UCombatComponent* CombatComponent;
+	
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"))
 	class UAnimMontage* AttackMontage;
 

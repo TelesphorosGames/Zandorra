@@ -13,7 +13,6 @@
 
 AZandorraCharacter::AZandorraCharacter()
 {
-
 	PrimaryActorTick.bCanEverTick = true;
 
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -25,7 +24,7 @@ AZandorraCharacter::AZandorraCharacter()
 	bUseControllerRotationRoll = false;
 
 
-	GetCharacterMovement()->bOrientRotationToMovement = true; 
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
 
 	GetCharacterMovement()->JumpZVelocity = 700.f;
@@ -37,14 +36,14 @@ AZandorraCharacter::AZandorraCharacter()
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 400.0f; 
-	CameraBoom->bUsePawnControlRotation = true; 
-	
+	CameraBoom->TargetArmLength = 400.0f;
+	CameraBoom->bUsePawnControlRotation = true;
+
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
-	FollowCamera->bUsePawnControlRotation = false; 
+	FollowCamera->bUsePawnControlRotation = false;
 	FollowCamera->SetFieldOfView(DefaultFOV);
-	
+
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
@@ -56,8 +55,6 @@ AZandorraCharacter::AZandorraCharacter()
 void AZandorraCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
-
 }
 
 void AZandorraCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -68,7 +65,7 @@ void AZandorraCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 
 	PlayerInputComponent->BindAxis("Move Forward / Backward", this, &AZandorraCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("Move Right / Left", this, &AZandorraCharacter::MoveRight);
-	
+
 	PlayerInputComponent->BindAxis("Turn Right / Left Mouse", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("Turn Right / Left Gamepad", this, &AZandorraCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("Look Up / Down Mouse", this, &APawn::AddControllerPitchInput);
@@ -83,37 +80,25 @@ void AZandorraCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AZandorraCharacter::FireButtonPressed);
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AZandorraCharacter::FireButtonReleased);
-	
 }
 
 void AZandorraCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	
+
 	InterpFOV(DeltaSeconds);
-	
 }
 
 void AZandorraCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
-	if(CombatComponent)
+	if (CombatComponent)
 	{
 		CombatComponent->ZCharacter = this;
 	}
 }
 
-bool AZandorraCharacter::GetBeamEndLocation(const FVector& BarrelLocation, FHitResult& OutHitResult)
-{
-	FHitResult CrosshairHitResult;
-	FVector OutBeamLocation;
-	
-	bool bCrosshairHit =
-	
-	
-	return false;
-}
 
 void AZandorraCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
 {
@@ -123,31 +108,29 @@ void AZandorraCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Loc
 void AZandorraCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)
 {
 	StopJumping();
-	
 }
 
 void AZandorraCharacter::AimButtonPressed()
 {
-	if(CombatComponent)
+	if (CombatComponent)
 	{
 		CombatComponent->SetAiming(true);
 		bAiming = true;
 	}
-	
 }
 
 void AZandorraCharacter::AimButtonReleased()
 {
-	if(CombatComponent)
-    {
-    	CombatComponent->SetAiming(false);
-		bAiming=false;
-    }
+	if (CombatComponent)
+	{
+		CombatComponent->SetAiming(false);
+		bAiming = false;
+	}
 }
 
 void AZandorraCharacter::FireButtonPressed()
 {
-	if(CombatComponent)
+	if (CombatComponent)
 	{
 		CombatComponent->FireWeaponPressed(true);
 	}
@@ -155,7 +138,7 @@ void AZandorraCharacter::FireButtonPressed()
 
 void AZandorraCharacter::FireButtonReleased()
 {
-	if(CombatComponent)
+	if (CombatComponent)
 	{
 		CombatComponent->FireWeaponPressed(false);
 	}
@@ -163,7 +146,7 @@ void AZandorraCharacter::FireButtonReleased()
 
 void AZandorraCharacter::InterpFOV(float DeltaTime)
 {
-	if(bAiming)
+	if (bAiming)
 	{
 		CurrentFOV = FMath::FInterpTo(CurrentFOV, ZoomedInFOV, DeltaTime, ZoomInterpSpeed);
 	}
@@ -171,7 +154,7 @@ void AZandorraCharacter::InterpFOV(float DeltaTime)
 	{
 		CurrentFOV = FMath::FInterpTo(CurrentFOV, DefaultFOV, DeltaTime, ZoomInterpSpeed);
 	}
-	if(FollowCamera)
+	if (FollowCamera)
 	{
 		FollowCamera->SetFieldOfView(CurrentFOV);
 	}
@@ -206,16 +189,15 @@ void AZandorraCharacter::MoveForward(float Value)
 
 void AZandorraCharacter::MoveRight(float Value)
 {
-	if ( (Controller != nullptr) && (Value != 0.0f) )
+	if ((Controller != nullptr) && (Value != 0.0f))
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
-	
+
 		// get right vector 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
 	}
-	
 }
