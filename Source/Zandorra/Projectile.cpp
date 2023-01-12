@@ -39,6 +39,11 @@ void AProjectile::BeginPlay()
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BarrelFlashParticles, GetActorLocation(), GetActorRotation());
 	}
+
+	if(LaunchSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, LaunchSound, GetActorLocation());
+	}
 	
 }
 

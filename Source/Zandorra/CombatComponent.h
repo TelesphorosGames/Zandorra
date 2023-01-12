@@ -26,14 +26,16 @@ public:
 
 	/* PUBLIC FUNCTIONS
 	 */
-	void FireWeaponPressed(bool bPressed);
-
 	
+	bool TraceUnderCrosshairs(FHitResult& TraceHitResult);
+	
+	void FireWeaponPressed(bool bPressed);
 	
 	/* PUBLIC VARIABLES
 	 */
 	UPROPERTY()
 	class AZandorraCharacter* ZCharacter{};
+	
 	
 		
 	/* GETTERS AND SETTERS
@@ -71,12 +73,15 @@ private:
 
 	/* PRIVATE FUNCTIONS
 	 */
-	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
+
+	void SetBackwardsMovementTarget();
 
 	void LaunchProjectile(const FVector& HitTarget);
 	bool CanFireWeapon();
 	void StartFireTimer();
 	void FireTimerFinished();
+	void StartBeamAttack();
+	void BeamAttackFinished();
 	
 
 	/* PRIVATE VARIABLES
@@ -94,6 +99,8 @@ private:
 	bool bFireButtonPressed = false;
 
 	bool bCanFire = true;
+
+	bool bHeldFire = false;
 
 	FTimerHandle FireWeaponTimer;
 

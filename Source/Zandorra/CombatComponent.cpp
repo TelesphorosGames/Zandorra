@@ -102,9 +102,9 @@ void UCombatComponent::SetHudCrosshairs(float DeltaTime)
 		CrosshairCrouchingFactor + CrosshairAimingFactor + CrosshairShootingFactor));
 }
 
-void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
+bool UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 {
-	if(!ZPlayerController || !ZCharacter) return;
+	if(!ZPlayerController || !ZCharacter) return false;
 	
 	FVector2D ViewportSize;
 
@@ -174,43 +174,47 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		if (!TraceHitResult.bBlockingHit)
 		{
 			TraceHitResult.ImpactPoint = End;
+			
 		}
 		
 		CrosshairsTarget = End;
+		return true;
 	}
 	else
 	{
 		
-	}	
+	}
+	return false;
 }
 
 
-void UCombatComponent::FireWeaponPressed(bool bPressed)
+void UCombatComponent::SetBackwardsMovementTarget()
 {
-	bFireButtonPressed = bPressed;
-	if(CanFireWeapon())
+	if(ZCharacter->GetVelocity().Size() > 0 && ZCharacter->MoveForwardAxisValue <= -.3f)
 	{
-		bCanFire = false;
-		StartFireTimer();
-
-	
-		
 		const USkeletalMeshSocket* BarrelSocket = ZCharacter->GetMesh()->GetSocketByName("Barrel");
 		if(BarrelSocket)
 		{
 			const FTransform SocketTransform = BarrelSocket->GetSocketTransform(ZCharacter->GetMesh());
-			FVector BarrelEnd = SocketTransform.GetLocation() + (SocketTransform.GetUnitAxis(EAxis::X));
+			const FVector BarrelEnd = SocketTransform.GetLocation() + (SocketTransform.GetUnitAxis(EAxis::X));
 			CrosshairsTarget = BarrelEnd;
 		}
+	}
+}
+
+void UCombatComponent::FireWeaponPressed(bool bPressed)
+{
+	bFireButtonPressed = bPressed;
+	
+	if(CanFireWeapon() && bFireButtonPressed)
+	{
+		bCanFire = false;
+		StartFireTimer();
+		
+		SetBackwardsMovementTarget();
 		
 		LaunchProjectile(CrosshairsTarget);
-		UAnimInstance* AnimInstance = ZCharacter->GetMesh()->GetAnimInstance();
-	
-		if(ZCharacter->GetAttackMontage() && AnimInstance)
-		{
-			AnimInstance->Montage_Play(ZCharacter->GetAttackMontage());
-			AnimInstance->Montage_JumpToSection("Fast");
-		}
+		
 	}
 	
 }
@@ -221,6 +225,14 @@ void UCombatComponent::LaunchProjectile(const FVector& HitTarget)
 	if(ZCharacter)
 	{
 		UWorld* World = GetWorld();
+
+
+		UAnimInstance* AnimInstance = ZCharacter->GetMesh()->GetAnimInstance();
+        if(ZCharacter->GetAttackMontage() && AnimInstance)
+        {
+        	AnimInstance->Montage_Play(ZCharacter->GetAttackMontage());
+        	AnimInstance->Montage_JumpToSection("Fast");
+        }
 		
 		const USkeletalMeshSocket* BarrelSocket = ZCharacter->GetMesh()->GetSocketByName("Barrel");
 		if(BarrelSocket && World)
@@ -237,10 +249,7 @@ void UCombatComponent::LaunchProjectile(const FVector& HitTarget)
 			AProjectile* SpawnedProjectile = World->SpawnActor<AProjectile>(ProjectileClass, SocketTransform.GetLocation(), TargetRotation, SpawnParams);
 
 		}
-		
-
 	}
-	
 }
 
 bool UCombatComponent::CanFireWeapon()
@@ -259,5 +268,42 @@ void UCombatComponent::StartFireTimer()
 void UCombatComponent::FireTimerFinished()
 {
 	bCanFire = true;
+	if(bFireButtonPressed)
+	{
+		bHeldFire = true;
+		StartBeamAttack();
+	}
+	else if(bHeldFire)
+	{
+		BeamAttackFinished();
+		bHeldFire = false;
+	}
+}
+
+void UCombatComponent::StartBeamAttack()
+{
+	if(!ZCharacter) return;
+	ZCharacter->bUsingBeamAttack = true;
+	StartFireTimer();
+	
+
+	UAnimInstance* AnimInstance = ZCharacter->GetMesh()->GetAnimInstance();
+	if(ZCharacter->GetAttackMontage() && AnimInstance)
+	{
+		AnimInstance->Montage_Play(ZCharacter->GetAttackMontage());
+		AnimInstance->Montage_JumpToSection("BeamHold");
+	}
+}
+
+void UCombatComponent::BeamAttackFinished()
+{
+	if(!ZCharacter) return;
+	ZCharacter->bUsingBeamAttack = false;
+	UAnimInstance* AnimInstance = ZCharacter->GetMesh()->GetAnimInstance();
+	if(ZCharacter->GetAttackMontage() && AnimInstance)
+	{
+		AnimInstance->Montage_Play(ZCharacter->GetAttackMontage());
+		AnimInstance->Montage_JumpToSection("BeamHoldEnd");
+	}
 }
 

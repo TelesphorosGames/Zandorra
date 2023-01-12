@@ -47,6 +47,9 @@ protected:
 	class USoundCue* ImpactSound;
 
 	UPROPERTY(EditAnywhere)
+	class USoundCue* LaunchSound;
+
+	UPROPERTY(EditAnywhere)
 	UParticleSystem* HitPlayerParticles;
 	
 	UPROPERTY(EditAnywhere)

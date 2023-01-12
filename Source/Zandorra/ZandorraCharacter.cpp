@@ -91,6 +91,7 @@ void AZandorraCharacter::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 	
 	InterpFOV(DeltaSeconds);
+	
 }
 
 void AZandorraCharacter::PostInitializeComponents()
@@ -101,6 +102,17 @@ void AZandorraCharacter::PostInitializeComponents()
 	{
 		CombatComponent->ZCharacter = this;
 	}
+}
+
+bool AZandorraCharacter::GetBeamEndLocation(const FVector& BarrelLocation, FHitResult& OutHitResult)
+{
+	FHitResult CrosshairHitResult;
+	FVector OutBeamLocation;
+	
+	bool bCrosshairHit =
+	
+	
+	return false;
 }
 
 void AZandorraCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
@@ -189,6 +201,7 @@ void AZandorraCharacter::MoveForward(float Value)
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		AddMovementInput(Direction, Value);
 	}
+	MoveForwardAxisValue = Value;
 }
 
 void AZandorraCharacter::MoveRight(float Value)

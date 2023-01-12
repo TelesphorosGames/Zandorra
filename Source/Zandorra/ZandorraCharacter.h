@@ -25,11 +25,17 @@ public:
 	/* PUBLIC FUNCTIONS
 	 */
 
+	bool GetBeamEndLocation(const FVector &BarrelLocation, FHitResult &OutHitResult);
+
 		
 	/* PUBLIC VARIABLES
 	 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Input)
 	float TurnRateGamepad;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float MoveForwardAxisValue = 0.f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bUsingBeamAttack = false;
 	
 	/* GETTERS AND SETTERS
 	 */
