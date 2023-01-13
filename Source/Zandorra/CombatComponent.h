@@ -30,6 +30,7 @@ public:
 	bool TraceUnderCrosshairs(FHitResult& TraceHitResult);
 	
 	void FireWeaponPressed(bool bPressed);
+
 	
 	/* PUBLIC VARIABLES
 	 */
@@ -82,7 +83,10 @@ private:
 	void FireTimerFinished();
 	void StartBeamAttack();
 	void BeamAttackFinished();
+
 	
+	void WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& OutHit);
+
 
 	/* PRIVATE VARIABLES
 	 */
@@ -114,6 +118,20 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AProjectile> ProjectileClass;
 
+	UPROPERTY(EditAnywhere)
+	class UParticleSystem* BeamSystem;
+
+	UPROPERTY(EditAnywhere)
+	class UParticleSystem* BeamImpactParticles;
+	
+	UPROPERTY(EditAnywhere)
+	class USoundCue* BeamImpactSound;
+
+	FTransform SocketTransform;
+
+	
+            
+	
 	
 		
 };

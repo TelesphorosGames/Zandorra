@@ -4,6 +4,7 @@
 #include "CombatComponent.h"
 
 #include "InteractWithCrosshairs.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Projectile.h"
 #include "ZandorraCharacter.h"
 #include "ZandorraHud.h"
@@ -13,6 +14,9 @@
 #include "Zandorra.h"
 #include "Animation/AnimInstance.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "Particles/ParticleSystem.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Sound/SoundCue.h"
 
 
 UCombatComponent::UCombatComponent()
@@ -37,6 +41,12 @@ void UCombatComponent::BeginPlay()
 			UE_LOG(LogTemp, Warning, TEXT("%s"), *ZPlayerController->GetName());
 		}
 	}
+	const USkeletalMeshSocket* BarrelSocket = ZCharacter->GetMesh()->GetSocketByName("Barrel");
+	if(BarrelSocket)
+	{
+		SocketTransform = BarrelSocket->GetSocketTransform(ZCharacter->GetMesh());
+	}
+            
 }
 
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType,
@@ -47,6 +57,7 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	SetHudCrosshairs(DeltaTime);
 	FHitResult HitResult;
 	TraceUnderCrosshairs(HitResult);
+	
 	
 }
 
@@ -147,7 +158,7 @@ bool UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		
 			);
 
-		if(TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairs>())
+		if(TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairs>() && TraceHitResult.GetActor() != ZCharacter)
 		{
 			if(ZHud == nullptr)
 			{
@@ -176,18 +187,19 @@ bool UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		{
 			TraceHitResult.ImpactPoint = End;
 			CrosshairsTarget = End;
+			return true;
 		}
-		else
+		if(TraceHitResult.GetActor() != ZCharacter)
 		{
 			CrosshairsTarget = TraceHitResult.ImpactPoint;
+			return true;
 		}
-		
+		CrosshairsTarget =TraceHitResult.TraceEnd;
 		return true;
 	}
-	else
-	{
-		CrosshairsTarget =TraceHitResult.TraceEnd;
-	}
+	
+	
+	
 	return false;
 }
 
@@ -199,7 +211,7 @@ void UCombatComponent::SetBackwardsMovementTarget()
 		const USkeletalMeshSocket* BarrelSocket = ZCharacter->GetMesh()->GetSocketByName("Barrel");
 		if(BarrelSocket)
 		{
-			const FTransform SocketTransform = BarrelSocket->GetSocketTransform(ZCharacter->GetMesh());
+			SocketTransform = BarrelSocket->GetSocketTransform(ZCharacter->GetMesh());
 			const FVector BarrelEnd = SocketTransform.GetLocation() + (SocketTransform.GetUnitAxis(EAxis::X));
 			CrosshairsTarget = BarrelEnd;
 		}
@@ -241,7 +253,7 @@ void UCombatComponent::LaunchProjectile(const FVector& HitTarget)
 		const USkeletalMeshSocket* BarrelSocket = ZCharacter->GetMesh()->GetSocketByName("Barrel");
 		if(BarrelSocket && World)
 		{
-			const FTransform SocketTransform = BarrelSocket->GetSocketTransform(ZCharacter->GetMesh());
+			SocketTransform = BarrelSocket->GetSocketTransform(ZCharacter->GetMesh());
             
 			// Muzzle socket to hit location from Trace Under Crosshairs
 			const FVector ToTarget = HitTarget - SocketTransform.GetLocation();
@@ -297,6 +309,17 @@ void UCombatComponent::StartBeamAttack()
 		AnimInstance->Montage_Play(ZCharacter->GetAttackMontage());
 		AnimInstance->Montage_JumpToSection("BeamHold");
 	}
+	const USkeletalMeshSocket* BarrelSocket = ZCharacter->GetMesh()->GetSocketByName("Barrel");
+	if(BarrelSocket)
+	{
+		SocketTransform = BarrelSocket->GetSocketTransform(ZCharacter->GetMesh());
+	}
+            
+
+	FHitResult Result;
+	WeaponTraceHit(SocketTransform.GetLocation(), CrosshairsTarget, Result);
+	
+	
 }
 
 void UCombatComponent::BeamAttackFinished()
@@ -308,6 +331,51 @@ void UCombatComponent::BeamAttackFinished()
 	{
 		AnimInstance->Montage_Play(ZCharacter->GetAttackMontage());
 		AnimInstance->Montage_JumpToSection("BeamHoldEnd");
+	}
+}
+
+void UCombatComponent::WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& OutHit)
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		const FVector End = TraceStart + (HitTarget - TraceStart) * 1.25;
+		
+		World->LineTraceSingleByChannel(
+			OutHit,
+			TraceStart,
+			End, 
+			ECollisionChannel::ECC_Visibility
+			);
+
+		FVector BeamEnd = End;
+		FVector BeamHitNormals;
+		
+		if(OutHit.bBlockingHit)
+		{
+			BeamEnd= OutHit.ImpactPoint;
+			BeamHitNormals = OutHit.Normal;
+		}
+		
+		DrawDebugSphere(GetWorld(), BeamEnd, 16.f, 12, FColor::Magenta, false, -1);
+
+		
+		if(BeamSystem)
+		{
+			UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(World, BeamSystem, TraceStart, FRotator::ZeroRotator, true);
+			if(Beam)
+			{
+				Beam->SetVectorParameter(FName("Target"), BeamEnd);
+			}
+		}
+		if(BeamImpactParticles)
+		{
+			UParticleSystemComponent* BeamImpact = UGameplayStatics::SpawnEmitterAtLocation(World, BeamImpactParticles, BeamEnd, BeamHitNormals.Rotation(), true);
+		}
+		if(BeamImpactSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(World, BeamImpactSound, BeamEnd);
+		}
 	}
 }
 
