@@ -80,6 +80,9 @@ void AZandorraCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AZandorraCharacter::FireButtonPressed);
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AZandorraCharacter::FireButtonReleased);
+
+	PlayerInputComponent->BindAction("Beam", IE_Pressed, this, &AZandorraCharacter::BeamButtonPressed);
+	PlayerInputComponent->BindAction("Beam", IE_Released, this, &AZandorraCharacter::BeamButtonReleased);
 }
 
 void AZandorraCharacter::Tick(float DeltaSeconds)
@@ -141,6 +144,22 @@ void AZandorraCharacter::FireButtonReleased()
 	if (CombatComponent)
 	{
 		CombatComponent->FireWeaponPressed(false);
+	}
+}
+
+void AZandorraCharacter::BeamButtonPressed()
+{
+	if (CombatComponent)
+	{
+		CombatComponent->FireBeamPressed(true);
+	}
+}
+
+void AZandorraCharacter::BeamButtonReleased()
+{
+	if (CombatComponent)
+	{
+		CombatComponent->FireBeamPressed(false);
 	}
 }
 

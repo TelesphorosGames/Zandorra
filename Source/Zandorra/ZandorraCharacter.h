@@ -69,6 +69,9 @@ protected:
 	void FireButtonPressed();
 	void FireButtonReleased();
 
+	void BeamButtonPressed();
+	void BeamButtonReleased();
+
 	void InterpFOV(float DeltaTime);
 
 	

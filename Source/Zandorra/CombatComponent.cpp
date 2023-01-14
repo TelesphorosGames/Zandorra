@@ -212,7 +212,7 @@ void UCombatComponent::SetBackwardsMovementTarget()
 		if(BarrelSocket)
 		{
 			SocketTransform = BarrelSocket->GetSocketTransform(ZCharacter->GetMesh());
-			const FVector BarrelEnd = SocketTransform.GetLocation() + (SocketTransform.GetUnitAxis(EAxis::X));
+			const FVector BarrelEnd = SocketTransform.GetLocation() + (SocketTransform.GetUnitAxis(EAxis::X) *5000);
 			CrosshairsTarget = BarrelEnd;
 		}
 	}
@@ -231,6 +231,17 @@ void UCombatComponent::FireWeaponPressed(bool bPressed)
 		
 		LaunchProjectile(CrosshairsTarget);
 		
+	}
+	
+}
+
+void UCombatComponent::FireBeamPressed(bool bPressed)
+{
+	bBeamButtonHeld = bPressed;
+	if(CanFireWeapon() && bBeamButtonHeld)
+	{
+		bCanFire = false;
+		StartBeamAttack();
 	}
 	
 }
@@ -281,10 +292,30 @@ void UCombatComponent::StartFireTimer()
 	}
 }
 
+void UCombatComponent::StartBeamTimer()
+{
+	if(ZCharacter)
+	{
+		ZCharacter->GetWorldTimerManager().SetTimer(BeamTimer, this, &UCombatComponent::BeamTimerFinished, BeamFireDelay);
+	}
+}
+
 void UCombatComponent::FireTimerFinished()
 {
 	bCanFire = true;
 	if(bFireButtonPressed)
+	{
+		bCanFire=false;
+		SetBackwardsMovementTarget();
+		LaunchProjectile(CrosshairsTarget);
+		StartFireTimer();
+	}
+}
+
+void UCombatComponent::BeamTimerFinished()
+{
+	bCanFire = true;
+	if(bBeamButtonHeld)
 	{
 		bHeldFire = true;
 		StartBeamAttack();
@@ -299,16 +330,31 @@ void UCombatComponent::FireTimerFinished()
 void UCombatComponent::StartBeamAttack()
 {
 	if(!ZCharacter) return;
+	bCanFire=false;
 	ZCharacter->bUsingBeamAttack = true;
-	StartFireTimer();
-	
 
+	SetBackwardsMovementTarget();
+	StartBeamTimer();
+	
 	UAnimInstance* AnimInstance = ZCharacter->GetMesh()->GetAnimInstance();
-	if(ZCharacter->GetAttackMontage() && AnimInstance)
+
+	if(bHeldFire)
 	{
-		AnimInstance->Montage_Play(ZCharacter->GetAttackMontage());
-		AnimInstance->Montage_JumpToSection("BeamHold");
+		if(ZCharacter->GetAttackMontage() && AnimInstance)
+		{
+			AnimInstance->Montage_Play(ZCharacter->GetAttackMontage());
+			AnimInstance->Montage_JumpToSection("BeamHold");
+		}
 	}
+	else
+	{
+		if(ZCharacter->GetAttackMontage() && AnimInstance)
+        {
+        	AnimInstance->Montage_Play(ZCharacter->GetAttackMontage());
+        	AnimInstance->Montage_JumpToSection("Beam");
+        }
+	}
+	
 	const USkeletalMeshSocket* BarrelSocket = ZCharacter->GetMesh()->GetSocketByName("Barrel");
 	if(BarrelSocket)
 	{
@@ -351,13 +397,13 @@ void UCombatComponent::WeaponTraceHit(const FVector& TraceStart, const FVector& 
 		FVector BeamEnd = End;
 		FVector BeamHitNormals;
 		
-		if(OutHit.bBlockingHit)
+		if(OutHit.bBlockingHit && OutHit.GetActor() != GetOwner())
 		{
 			BeamEnd= OutHit.ImpactPoint;
 			BeamHitNormals = OutHit.Normal;
 		}
 		
-		DrawDebugSphere(GetWorld(), BeamEnd, 16.f, 12, FColor::Magenta, false, -1);
+		// DrawDebugSphere(GetWorld(), BeamEnd, 16.f, 12, FColor::Magenta, false, -1);
 
 		
 		if(BeamSystem)

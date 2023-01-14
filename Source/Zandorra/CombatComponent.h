@@ -30,6 +30,7 @@ public:
 	bool TraceUnderCrosshairs(FHitResult& TraceHitResult);
 	
 	void FireWeaponPressed(bool bPressed);
+	void FireBeamPressed(bool bPressed);
 
 	
 	/* PUBLIC VARIABLES
@@ -80,7 +81,9 @@ private:
 	void LaunchProjectile(const FVector& HitTarget);
 	bool CanFireWeapon();
 	void StartFireTimer();
+	void StartBeamTimer();
 	void FireTimerFinished();
+	void BeamTimerFinished();
 	void StartBeamAttack();
 	void BeamAttackFinished();
 
@@ -101,12 +104,14 @@ private:
 	FLinearColor CrosshairsColor;
 
 	bool bFireButtonPressed = false;
+	bool bBeamButtonHeld = false;
 
 	bool bCanFire = true;
 
 	bool bHeldFire = false;
 
 	FTimerHandle FireWeaponTimer;
+	FTimerHandle BeamTimer;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	FVector CrosshairsTarget;
@@ -114,6 +119,9 @@ private:
 	
 	UPROPERTY(EditAnywhere)
 	float WeaponFireDelay = 4.f;
+	
+	UPROPERTY(EditAnywhere)
+	float BeamFireDelay =.05f;
 	
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AProjectile> ProjectileClass;
