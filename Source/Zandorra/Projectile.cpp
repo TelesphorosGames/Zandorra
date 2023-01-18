@@ -1,6 +1,8 @@
 #include "Projectile.h"
 
+#include "HealthComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "ZandorraCharacter.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -15,7 +17,7 @@ AProjectile::AProjectile()
 	SetRootComponent(CollisionBox);
 
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
-
+	
 }
 
 void AProjectile::BeginPlay()
@@ -82,6 +84,18 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
 	}
 
+	if(OtherActor)
+	{
+		AZandorraCharacter* HitCharacter = Cast<AZandorraCharacter>(OtherActor);
+		{
+			if(HitCharacter)
+			{
+				HitCharacter->TakeCharacterDamage(HitCharacter, DamageAmount, DamageType, nullptr, this);
+
+				UE_LOG(LogTemp, Warning, TEXT("Hit Character : %s , Damage Applied : %f"), *HitCharacter->GetName(), DamageAmount);
+			}
+		}
+	}
 
 	
 	Destroy();

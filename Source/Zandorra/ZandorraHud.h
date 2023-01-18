@@ -18,6 +18,8 @@ class ZANDORRA_API AZandorraHud : public AHUD
 
 public:
 
+	AZandorraHud();
+
 	UPROPERTY(EditDefaultsOnly)
 	class UTexture2D* CrosshairsCenter;
 	UPROPERTY(EditDefaultsOnly)
@@ -28,9 +30,6 @@ public:
 	class UTexture2D* CrosshairsTop;
 	UPROPERTY(EditDefaultsOnly)
 	class UTexture2D* CrosshairsBottom;
-
-	
-	
 	
 	UPROPERTY(EditAnywhere)
 	float CrosshairSpreadMax = 16.f;
@@ -38,10 +37,11 @@ public:
 	FLinearColor CrosshairsColor = FColor::White;
 
 	virtual void DrawHUD() override;
-
-	//
-	// UPROPERTY(EditAnywhere,Category=Stats)
-	// TSubclassOf<class UUserWidget> CharacterOverlayClass;
+	virtual void BeginPlay() override;
+	
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UUserWidget> CharacterOverlayClass;
+	
 	// UPROPERTY()
 	// class UCharacterOverlay* CharacterOverlay{};
 
@@ -58,6 +58,6 @@ protected:
 	
 private:
 	float CrosshairSpread;
-	
+
 	
 };

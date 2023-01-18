@@ -70,6 +70,12 @@ protected:
 	UFUNCTION()
 	void SpawnTrailSystem();
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float DamageAmount;
+
+	UPROPERTY(EditAnywhere)
+	UDamageType* DamageType{};
+
 private:
 
 	UPROPERTY(EditAnywhere)

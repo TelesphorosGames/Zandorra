@@ -3,6 +3,7 @@
 #include "ZandorraCharacter.h"
 
 #include "CombatComponent.h"
+#include "HealthComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
@@ -45,6 +46,7 @@ AZandorraCharacter::AZandorraCharacter()
 	FollowCamera->SetFieldOfView(DefaultFOV);
 
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
@@ -55,6 +57,9 @@ AZandorraCharacter::AZandorraCharacter()
 void AZandorraCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	OnTakeAnyDamage.AddDynamic(this, &AZandorraCharacter::TakeCharacterDamage);
+	
 }
 
 void AZandorraCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -99,6 +104,10 @@ void AZandorraCharacter::PostInitializeComponents()
 	if (CombatComponent)
 	{
 		CombatComponent->ZCharacter = this;
+	}
+	if(HealthComponent)
+	{
+	
 	}
 }
 
@@ -181,14 +190,15 @@ void AZandorraCharacter::InterpFOV(float DeltaTime)
 
 void AZandorraCharacter::TurnAtRate(float Rate)
 {
-	// calculate delta for this frame from the rate information
+
 	AddControllerYawInput(Rate * TurnRateGamepad * GetWorld()->GetDeltaSeconds());
 }
 
 void AZandorraCharacter::LookUpAtRate(float Rate)
 {
-	// calculate delta for this frame from the rate information
+
 	AddControllerPitchInput(Rate * TurnRateGamepad * GetWorld()->GetDeltaSeconds());
+
 }
 
 void AZandorraCharacter::MoveForward(float Value)
@@ -199,7 +209,6 @@ void AZandorraCharacter::MoveForward(float Value)
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		// get forward vector
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		AddMovementInput(Direction, Value);
 	}
@@ -210,13 +219,22 @@ void AZandorraCharacter::MoveRight(float Value)
 {
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
-		// find out which way is right
+
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		// get right vector 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-		// add movement in that direction
+
 		AddMovementInput(Direction, Value);
 	}
+}
+
+void AZandorraCharacter::TakeCharacterDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
+	AController* InstigatedBy, AActor* DamageCauser)
+{
+	if(HealthComponent)
+	{
+		HealthComponent->AdjustHealth(-Damage);
+	}
+	
 }

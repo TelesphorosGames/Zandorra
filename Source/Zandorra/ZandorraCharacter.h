@@ -24,6 +24,9 @@ public:
 
 	/* PUBLIC FUNCTIONS
 	 */
+
+	void TakeCharacterDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+	
 	
 	/* PUBLIC VARIABLES
 	 */
@@ -33,8 +36,9 @@ public:
 	float MoveForwardAxisValue = 0.f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bUsingBeamAttack = false;
-
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
+	class UHealthComponent* HealthComponent;
 	
 	/* GETTERS AND SETTERS
 	 */
@@ -51,6 +55,7 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void BeginPlay() override;
+	
  	
 	/* PROTECTED FUNCTIONS
 	 */
@@ -74,7 +79,7 @@ protected:
 
 	void InterpFOV(float DeltaTime);
 
-	
+
 	/* PROTECTED VARIABLES
 	 */
 
@@ -98,13 +103,13 @@ protected:
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"))
 	class UAnimMontage* AttackMontage;
 
+	
 	bool bAiming = false;
 
-
+	
 private:
 	
-	
-	
 };
+
 
 

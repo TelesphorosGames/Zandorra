@@ -1,7 +1,10 @@
 #include "ZandorraHud.h"
 
 
-
+AZandorraHud::AZandorraHud()
+{
+	
+}
 
 void AZandorraHud::DrawHUD()
 {
@@ -50,8 +53,14 @@ void AZandorraHud::DrawHUD()
 	}
 }
 
+void AZandorraHud::BeginPlay()
+{
+	Super::BeginPlay();
+	
+}
+
 void AZandorraHud::DrawCrosshairs(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread,
-	FLinearColor CrosshairColor)
+                                  FLinearColor CrosshairColor)
 {
 	const float TextureWidth = Texture->GetSizeX();
 	const float TextureHeight = Texture->GetSizeY();
