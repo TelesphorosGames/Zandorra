@@ -42,20 +42,15 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UUserWidget> CharacterOverlayClass;
 	
-	// UPROPERTY()
-	// class UCharacterOverlay* CharacterOverlay{};
+	UPROPERTY()
+	class UUserWidget* CharacterOverlay{};
 
 	UFUNCTION()
 	void DrawCrosshairs(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor CrosshairColor);
-
-
+	
 	FORCEINLINE void SetCrosshairSpread(const float InSpread) {CrosshairSpread = InSpread;}
 	FORCEINLINE void SetCrosshairsColor(const FLinearColor InColor) {CrosshairsColor = InColor;}
 
-	
-protected:
-
-	
 private:
 	float CrosshairSpread;
 

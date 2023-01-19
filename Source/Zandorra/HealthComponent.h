@@ -18,18 +18,21 @@ public:
 
 	void AdjustHealth(float Adjustment);
 
-	UFUNCTION(BlueprintPure)
-	const float GetHealth();
+	UFUNCTION(BlueprintGetter)
+	float GetHealthPercentage() const;
+
+	
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float Health;
 
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float MaxHealth;
+	
 protected:
 
 	virtual void BeginPlay() override;
 
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	class AZandorraCharacter* OwningCharacter;
+	
 };

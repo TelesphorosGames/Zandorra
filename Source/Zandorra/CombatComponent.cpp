@@ -414,11 +414,11 @@ void UCombatComponent::WeaponTraceHit(const FVector& TraceStart, const FVector& 
 				Beam->SetVectorParameter(FName("Target"), BeamEnd);
 			}
 		}
-		if(BeamImpactParticles)
+		if(BeamImpactParticles && BeamEnd != End)
 		{
 			UParticleSystemComponent* BeamImpact = UGameplayStatics::SpawnEmitterAtLocation(World, BeamImpactParticles, BeamEnd, BeamHitNormals.Rotation(), true);
 		}
-		if(BeamImpactSound)
+		if(BeamImpactSound && BeamEnd != End )
 		{
 			UGameplayStatics::PlaySoundAtLocation(World, BeamImpactSound, BeamEnd);
 		}

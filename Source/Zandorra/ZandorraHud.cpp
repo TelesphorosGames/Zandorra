@@ -1,5 +1,7 @@
 #include "ZandorraHud.h"
 
+#include "Blueprint/UserWidget.h"
+
 
 AZandorraHud::AZandorraHud()
 {
@@ -56,6 +58,14 @@ void AZandorraHud::DrawHUD()
 void AZandorraHud::BeginPlay()
 {
 	Super::BeginPlay();
+
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if(CharacterOverlayClass && PlayerController)
+	{
+		CharacterOverlay = CreateWidget<UUserWidget>(PlayerController, CharacterOverlayClass);
+		CharacterOverlay->AddToViewport();
+	}
+	
 	
 }
 

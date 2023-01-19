@@ -137,7 +137,11 @@ private:
 
 	FTransform SocketTransform;
 
+	UPROPERTY(EditAnywhere)
+	float WeaponCharge;
 	
+	UPROPERTY(EditAnywhere)
+	float WeaponChargeMax;
             
 	
 	

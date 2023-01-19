@@ -1,9 +1,11 @@
 #include "HealthComponent.h"
-#include "ZandorraCharacter.h"
+
 
 UHealthComponent::UHealthComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	MaxHealth = 100.f;
+	Health = MaxHealth;
 	
 }
 
@@ -26,13 +28,13 @@ void UHealthComponent::AdjustHealth(float Adjustment)
 	Health += Adjustment;
 	if(Health <0)
 	{
-		Health = FMath::Clamp(0, Health, Health);
+		Health = FMath::Clamp(Health, 0, MaxHealth);
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Health : %f"), Health);
 }
 
-const float UHealthComponent::GetHealth()
+float UHealthComponent::GetHealthPercentage() const
 {
-	return Health;
+	return Health / MaxHealth;
 }
 
