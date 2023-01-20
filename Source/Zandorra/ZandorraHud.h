@@ -10,7 +10,6 @@
  * 
  */
 
-
 UCLASS()
 class ZANDORRA_API AZandorraHud : public AHUD
 {

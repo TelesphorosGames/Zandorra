@@ -198,8 +198,6 @@ bool UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		return true;
 	}
 	
-	
-	
 	return false;
 }
 
@@ -243,9 +241,7 @@ void UCombatComponent::FireBeamPressed(bool bPressed)
 		bCanFire = false;
 		StartBeamAttack();
 	}
-	
 }
-
 
 void UCombatComponent::LaunchProjectile(const FVector& HitTarget)
 {
@@ -253,7 +249,7 @@ void UCombatComponent::LaunchProjectile(const FVector& HitTarget)
 	{
 		UWorld* World = GetWorld();
 
-
+		
 		UAnimInstance* AnimInstance = ZCharacter->GetMesh()->GetAnimInstance();
         if(ZCharacter->GetAttackMontage() && AnimInstance)
         {
@@ -272,9 +268,12 @@ void UCombatComponent::LaunchProjectile(const FVector& HitTarget)
             
 			FActorSpawnParameters SpawnParams;
 			SpawnParams.Owner = GetOwner();
+			
             
-			AProjectile* SpawnedProjectile = World->SpawnActor<AProjectile>(ProjectileClass, SocketTransform.GetLocation(), TargetRotation, SpawnParams);
+			World->SpawnActor<AProjectile>(ProjectileClass, SocketTransform.GetLocation(), TargetRotation, SpawnParams);
 
+			WeaponCharge -= WeaponProjectileCost;
+			
 		}
 	}
 }
@@ -342,8 +341,10 @@ void UCombatComponent::StartBeamAttack()
 	{
 		if(ZCharacter->GetAttackMontage() && AnimInstance)
 		{
+			const float DeltaTimeSeconds = UGameplayStatics::GetWorldDeltaSeconds(GetWorld());
 			AnimInstance->Montage_Play(ZCharacter->GetAttackMontage());
 			AnimInstance->Montage_JumpToSection("BeamHold");
+			WeaponCharge -= WeaponDrainRate * DeltaTimeSeconds;
 		}
 	}
 	else
@@ -360,12 +361,9 @@ void UCombatComponent::StartBeamAttack()
 	{
 		SocketTransform = BarrelSocket->GetSocketTransform(ZCharacter->GetMesh());
 	}
-            
-
+	
 	FHitResult Result;
 	WeaponTraceHit(SocketTransform.GetLocation(), CrosshairsTarget, Result);
-	
-	
 }
 
 void UCombatComponent::BeamAttackFinished()
@@ -401,10 +399,17 @@ void UCombatComponent::WeaponTraceHit(const FVector& TraceStart, const FVector& 
 		{
 			BeamEnd= OutHit.ImpactPoint;
 			BeamHitNormals = OutHit.Normal;
+
+			IDamageable* DamageableObject = Cast<IDamageable>(OutHit.GetActor());
+			if(DamageableObject)
+			{
+				const UDamageType* DamageType{};
+				DamageableObject->AddDamage(OutHit.GetActor(), BeamDamageAmount, DamageType, nullptr, GetOwner());
+				UE_LOG(LogTemp, Warning, TEXT("Hit Character : %s , Damage Applied : %f"), *OutHit.GetActor()->GetName(), BeamDamageAmount);
+			}
 		}
 		
 		// DrawDebugSphere(GetWorld(), BeamEnd, 16.f, 12, FColor::Magenta, false, -1);
-
 		
 		if(BeamSystem)
 		{
@@ -414,6 +419,9 @@ void UCombatComponent::WeaponTraceHit(const FVector& TraceStart, const FVector& 
 				Beam->SetVectorParameter(FName("Target"), BeamEnd);
 			}
 		}
+		
+		
+		
 		if(BeamImpactParticles && BeamEnd != End)
 		{
 			UParticleSystemComponent* BeamImpact = UGameplayStatics::SpawnEmitterAtLocation(World, BeamImpactParticles, BeamEnd, BeamHitNormals.Rotation(), true);
@@ -423,5 +431,10 @@ void UCombatComponent::WeaponTraceHit(const FVector& TraceStart, const FVector& 
 			UGameplayStatics::PlaySoundAtLocation(World, BeamImpactSound, BeamEnd);
 		}
 	}
+}
+
+float UCombatComponent::GetWeaponChargePercentage()
+{
+	return WeaponCharge / WeaponChargeMax;
 }
 

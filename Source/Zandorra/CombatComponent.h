@@ -115,13 +115,15 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	FVector CrosshairsTarget;
-
 	
 	UPROPERTY(EditAnywhere)
 	float WeaponFireDelay = 4.f;
 	
 	UPROPERTY(EditAnywhere)
 	float BeamFireDelay =.05f;
+	
+	UPROPERTY(EditAnywhere)
+	float BeamDamageAmount =.5f;
 	
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AProjectile> ProjectileClass;
@@ -142,8 +144,15 @@ private:
 	
 	UPROPERTY(EditAnywhere)
 	float WeaponChargeMax;
-            
+
+	UFUNCTION(BlueprintGetter)
+	float GetWeaponChargePercentage();
 	
+	// To be multiplied be delta time , amount per second
+	UPROPERTY(EditAnywhere)
+	float WeaponDrainRate=10.f;
 	
+	UPROPERTY(EditAnywhere)
+	float WeaponProjectileCost=2.f;
 		
 };

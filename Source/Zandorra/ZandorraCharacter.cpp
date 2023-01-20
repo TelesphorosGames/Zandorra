@@ -23,8 +23,7 @@ AZandorraCharacter::AZandorraCharacter()
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
-
-
+	
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
 
@@ -51,6 +50,9 @@ AZandorraCharacter::AZandorraCharacter()
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 	GetMesh()->SetCollisionObjectType(ECC_SkeletalMesh);
+
+	MaxStamina = 100.f;
+	Stamina = MaxStamina;
 	
 }
 
@@ -58,7 +60,7 @@ void AZandorraCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	OnTakeAnyDamage.AddDynamic(this, &AZandorraCharacter::TakeCharacterDamage);
+	OnTakeAnyDamage.AddDynamic(this, &AZandorraCharacter::AddDamage);
 	
 }
 
@@ -232,9 +234,15 @@ void AZandorraCharacter::MoveRight(float Value)
 void AZandorraCharacter::TakeCharacterDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
 	AController* InstigatedBy, AActor* DamageCauser)
 {
+	
+}
+
+void AZandorraCharacter::AddDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
+	AController* InstigatedBy, AActor* DamageCauser)
+{
 	if(HealthComponent)
 	{
 		HealthComponent->AdjustHealth(-Damage);
 	}
-	
 }
+

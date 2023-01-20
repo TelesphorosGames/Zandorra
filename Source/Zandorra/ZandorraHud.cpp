@@ -39,17 +39,17 @@ void AZandorraHud::DrawHUD()
 		}
 		if(CrosshairsRight != nullptr)
 		{
-			FVector2D Spread{SpreadScaled, 0.f};
+			const FVector2D Spread{SpreadScaled, 0.f};
 			DrawCrosshairs(CrosshairsRight, ViewportCenter, Spread, CrosshairsColor);
 		}
 		if(CrosshairsTop != nullptr)
 		{
-			FVector2D Spread{0.f, -SpreadScaled};
+			const FVector2D Spread{0.f, -SpreadScaled};
 			DrawCrosshairs(CrosshairsTop, ViewportCenter, Spread, CrosshairsColor);
 		}
 		if(CrosshairsBottom != nullptr)
 		{
-			FVector2D Spread{0.f, SpreadScaled};
+			const FVector2D Spread{0.f, SpreadScaled};
 			DrawCrosshairs(CrosshairsBottom, ViewportCenter, Spread, CrosshairsColor);
 		}
 	}

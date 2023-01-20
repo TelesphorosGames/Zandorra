@@ -1,12 +1,11 @@
 #include "Projectile.h"
 
-#include "HealthComponent.h"
 #include "NiagaraFunctionLibrary.h"
-#include "ZandorraCharacter.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
+#include "Damageable.h"
 
 
 AProjectile::AProjectile()
@@ -84,17 +83,11 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
 	}
 
-	if(OtherActor)
+	IDamageable* DamageableObject = Cast<IDamageable>(OtherActor);
+	if(DamageableObject)
 	{
-		AZandorraCharacter* HitCharacter = Cast<AZandorraCharacter>(OtherActor);
-		{
-			if(HitCharacter)
-			{
-				HitCharacter->TakeCharacterDamage(HitCharacter, DamageAmount, DamageType, nullptr, this);
-
-				UE_LOG(LogTemp, Warning, TEXT("Hit Character : %s , Damage Applied : %f"), *HitCharacter->GetName(), DamageAmount);
-			}
-		}
+		DamageableObject->AddDamage(OtherActor, DamageAmount, DamageType, nullptr, this);
+		// UE_LOG(LogTemp, Warning, TEXT("Hit Character : %s , Damage Applied : %f"), , DamageAmount);
 	}
 
 	

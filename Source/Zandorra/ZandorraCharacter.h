@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Damageable.h"
 #include "InteractWithCrosshairs.h"
 #include "GameFramework/Character.h"
 
@@ -9,7 +10,7 @@
 
 
 UCLASS(config=Game)
-class AZandorraCharacter : public ACharacter, public IInteractWithCrosshairs
+class AZandorraCharacter : public ACharacter, public IInteractWithCrosshairs, public IDamageable
 {
 	GENERATED_BODY()
 
@@ -21,6 +22,10 @@ public:
 	 */
 	
 	virtual void PostInitializeComponents() override;
+
+	
+	virtual void AddDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser) override;
+ 	
 
 	/* PUBLIC FUNCTIONS
 	 */
@@ -55,8 +60,7 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void BeginPlay() override;
-	
- 	
+
 	/* PROTECTED FUNCTIONS
 	 */
 
@@ -96,16 +100,19 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float ZoomInterpSpeed =4.f;
 	
-	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	class UCombatComponent* CombatComponent;
 	
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"))
 	class UAnimMontage* AttackMontage;
-
 	
 	bool bAiming = false;
 
+	UPROPERTY(EditAnywhere)
+	float Stamina;
+
+	UPROPERTY(EditAnywhere)
+	float MaxStamina;
 	
 private:
 	

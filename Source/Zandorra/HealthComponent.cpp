@@ -3,10 +3,9 @@
 
 UHealthComponent::UHealthComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 	MaxHealth = 100.f;
 	Health = MaxHealth;
-	
 }
 
 
