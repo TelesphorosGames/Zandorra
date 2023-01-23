@@ -8,6 +8,8 @@
 
 #include "ZandorraCharacter.generated.h"
 
+DECLARE_DELEGATE_OneParam(FSetCanFireDelegate, bool);
+
 
 UCLASS(config=Game)
 class AZandorraCharacter : public ACharacter, public IInteractWithCrosshairs, public IDamageable
@@ -22,11 +24,9 @@ public:
 	 */
 	
 	virtual void PostInitializeComponents() override;
-
 	
 	virtual void AddDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser) override;
- 	
-
+	
 	/* PUBLIC FUNCTIONS
 	 */
 
@@ -39,17 +39,28 @@ public:
 	float TurnRateGamepad;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float MoveForwardAxisValue = 0.f;
+	UPROPERTY()
+	FVector CrosshairsTarget{};
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bUsingBeamAttack = false;
+	UPROPERTY()
+	bool bAbilityButtonHeld = false;
+		
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	class UHealthComponent* HealthComponent;
+	
+	FSetCanFireDelegate SetCanFireDelegate;
 	
 	/* GETTERS AND SETTERS
 	 */
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-	FORCEINLINE class UAnimMontage* GetAttackMontage() const {return AttackMontage; }
+	FORCEINLINE UAnimMontage* GetAttackMontage() const {return AttackMontage; }
+	FORCEINLINE class UCombatComponent* GetCombatComponent() const {return CombatComponent; }
+	FORCEINLINE FVector GetCrosshairsTarget() const {return CrosshairsTarget; }
+
+	virtual class UBeamAttackComponent* GetBeamAttackComponent();
 	
 protected:
 
@@ -78,8 +89,8 @@ protected:
 	void FireButtonPressed();
 	void FireButtonReleased();
 
-	void BeamButtonPressed();
-	void BeamButtonReleased();
+	virtual void AbilityButtonPressed();
+	virtual void AbilityButtonReleased();
 
 	void InterpFOV(float DeltaTime);
 
@@ -115,6 +126,8 @@ protected:
 	float MaxStamina;
 	
 private:
+
+	
 	
 };
 

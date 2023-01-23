@@ -30,23 +30,31 @@ public:
 	bool TraceUnderCrosshairs(FHitResult& TraceHitResult);
 	
 	void FireWeaponPressed(bool bPressed);
-	void FireBeamPressed(bool bPressed);
+	
+	void AbilityButtonPressed(bool bPressed);
+	
+	void SetBackwardsMovementTarget();
+
 
 	
 	/* PUBLIC VARIABLES
 	 */
 	UPROPERTY()
 	class AZandorraCharacter* ZCharacter{};
-	
-	
-		
+	// Used to determine which direction the barrel of the weapon should face, depending on which direction character is facing
+	FTransform SocketTransform;
+
 	/* GETTERS AND SETTERS
 	 */
+
+	FORCEINLINE FVector GetCrosshairsTarget() const {return CrosshairsTarget; }
 	
-	FORCEINLINE	void SetAiming(bool bAimSetTo);
+	FORCEINLINE	void SetAiming(bool bAimSetTo)	{bIsAiming = bAimSetTo; }
+
+	UFUNCTION()
+	void SetCanFire(bool bCanFireSetTo); 
 
 	
-		
 protected:
 
 	/* OVERRIDES
@@ -67,30 +75,18 @@ protected:
 	void SetHudCrosshairs(float DeltaTime);
 
 	bool bIsAiming;
-	
-private:
 
-	/* OVERRIDES
-		 */
+private:
 
 	/* PRIVATE FUNCTIONS
 	 */
 
-	void SetBackwardsMovementTarget();
-
 	void LaunchProjectile(const FVector& HitTarget);
 	bool CanFireWeapon();
 	void StartFireTimer();
-	void StartBeamTimer();
+
 	void FireTimerFinished();
-	void BeamTimerFinished();
-	void StartBeamAttack();
-	void BeamAttackFinished();
-
 	
-	void WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& OutHit);
-
-
 	/* PRIVATE VARIABLES
 	 */
 	float CrosshairVelocityFactor{};
@@ -103,56 +99,21 @@ private:
 
 	FLinearColor CrosshairsColor;
 
-	bool bFireButtonPressed = false;
-	bool bBeamButtonHeld = false;
-
-	bool bCanFire = true;
-
-	bool bHeldFire = false;
-
-	FTimerHandle FireWeaponTimer;
-	FTimerHandle BeamTimer;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	FVector CrosshairsTarget;
 	
+	bool bFireButtonPressed = false;
+	
+	UPROPERTY()
+	bool bCanFire = true;
+	
+	FTimerHandle FireWeaponTimer;
+
 	UPROPERTY(EditAnywhere)
 	float WeaponFireDelay = 4.f;
-	
-	UPROPERTY(EditAnywhere)
-	float BeamFireDelay =.05f;
-	
-	UPROPERTY(EditAnywhere)
-	float BeamDamageAmount =.5f;
-	
+
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AProjectile> ProjectileClass;
 
-	UPROPERTY(EditAnywhere)
-	class UParticleSystem* BeamSystem;
 
-	UPROPERTY(EditAnywhere)
-	class UParticleSystem* BeamImpactParticles;
-	
-	UPROPERTY(EditAnywhere)
-	class USoundCue* BeamImpactSound;
-
-	FTransform SocketTransform;
-
-	UPROPERTY(EditAnywhere)
-	float WeaponCharge;
-	
-	UPROPERTY(EditAnywhere)
-	float WeaponChargeMax;
-
-	UFUNCTION(BlueprintGetter)
-	float GetWeaponChargePercentage();
-	
-	// To be multiplied be delta time , amount per second
-	UPROPERTY(EditAnywhere)
-	float WeaponDrainRate=10.f;
-	
-	UPROPERTY(EditAnywhere)
-	float WeaponProjectileCost=2.f;
-		
 };

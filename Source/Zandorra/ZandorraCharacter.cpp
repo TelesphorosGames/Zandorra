@@ -61,7 +61,13 @@ void AZandorraCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	OnTakeAnyDamage.AddDynamic(this, &AZandorraCharacter::AddDamage);
+	SetCanFireDelegate.BindUFunction(CombatComponent, "SetCanFire");
 	
+}
+
+UBeamAttackComponent* AZandorraCharacter::GetBeamAttackComponent()
+{
+	return nullptr;
 }
 
 void AZandorraCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -88,8 +94,8 @@ void AZandorraCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AZandorraCharacter::FireButtonPressed);
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AZandorraCharacter::FireButtonReleased);
 
-	PlayerInputComponent->BindAction("Beam", IE_Pressed, this, &AZandorraCharacter::BeamButtonPressed);
-	PlayerInputComponent->BindAction("Beam", IE_Released, this, &AZandorraCharacter::BeamButtonReleased);
+	PlayerInputComponent->BindAction("Beam", IE_Pressed, this, &AZandorraCharacter::AbilityButtonPressed);
+	PlayerInputComponent->BindAction("Beam", IE_Released, this, &AZandorraCharacter::AbilityButtonReleased);
 }
 
 void AZandorraCharacter::Tick(float DeltaSeconds)
@@ -97,6 +103,12 @@ void AZandorraCharacter::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	InterpFOV(DeltaSeconds);
+	
+	if(CombatComponent)
+	{
+		CrosshairsTarget=CombatComponent->GetCrosshairsTarget();
+	}
+	
 }
 
 void AZandorraCharacter::PostInitializeComponents()
@@ -158,19 +170,22 @@ void AZandorraCharacter::FireButtonReleased()
 	}
 }
 
-void AZandorraCharacter::BeamButtonPressed()
+void AZandorraCharacter::AbilityButtonPressed()
 {
+	bAbilityButtonHeld = true;
 	if (CombatComponent)
 	{
-		CombatComponent->FireBeamPressed(true);
+		CombatComponent->AbilityButtonPressed(true);
 	}
+	
 }
 
-void AZandorraCharacter::BeamButtonReleased()
+void AZandorraCharacter::AbilityButtonReleased()
 {
+	bAbilityButtonHeld = false;
 	if (CombatComponent)
 	{
-		CombatComponent->FireBeamPressed(false);
+		CombatComponent->AbilityButtonPressed(false);
 	}
 }
 
@@ -192,7 +207,6 @@ void AZandorraCharacter::InterpFOV(float DeltaTime)
 
 void AZandorraCharacter::TurnAtRate(float Rate)
 {
-
 	AddControllerYawInput(Rate * TurnRateGamepad * GetWorld()->GetDeltaSeconds());
 }
 

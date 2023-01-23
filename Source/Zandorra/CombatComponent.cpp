@@ -9,19 +9,30 @@
 #include "ZandorraCharacter.h"
 #include "ZandorraHud.h"
 #include "ZandorraPlayerController.h"
-#include "GameFramework/CharacterMovementComponent.h"
-#include "Kismet/GameplayStatics.h"
-#include "Zandorra.h"
 #include "Animation/AnimInstance.h"
 #include "Engine/SkeletalMeshSocket.h"
-#include "Particles/ParticleSystem.h"
-#include "Particles/ParticleSystemComponent.h"
-#include "Sound/SoundCue.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
+#include "Zandorra.h"
 
 UCombatComponent::UCombatComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+}
+
+void UCombatComponent::SetCanFire(bool bCanFireSetTo)
+{
+	bCanFire = bCanFireSetTo; 
+	if(bCanFireSetTo)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Called from Combat side yes"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Called from Combat side no"));
+	}
+	
 }
 
 void UCombatComponent::BeginPlay()
@@ -57,13 +68,7 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	SetHudCrosshairs(DeltaTime);
 	FHitResult HitResult;
 	TraceUnderCrosshairs(HitResult);
-	
-	
-}
-
-void UCombatComponent::SetAiming(bool bAimSetTo)
-{
-	bIsAiming = bAimSetTo;
+		
 }
 
 void UCombatComponent::SetHudCrosshairs(float DeltaTime)
@@ -230,17 +235,11 @@ void UCombatComponent::FireWeaponPressed(bool bPressed)
 		LaunchProjectile(CrosshairsTarget);
 		
 	}
-	
 }
 
-void UCombatComponent::FireBeamPressed(bool bPressed)
+void UCombatComponent::AbilityButtonPressed(bool bPressed)
 {
-	bBeamButtonHeld = bPressed;
-	if(CanFireWeapon() && bBeamButtonHeld)
-	{
-		bCanFire = false;
-		StartBeamAttack();
-	}
+	SetBackwardsMovementTarget();
 }
 
 void UCombatComponent::LaunchProjectile(const FVector& HitTarget)
@@ -272,8 +271,7 @@ void UCombatComponent::LaunchProjectile(const FVector& HitTarget)
             
 			World->SpawnActor<AProjectile>(ProjectileClass, SocketTransform.GetLocation(), TargetRotation, SpawnParams);
 
-			WeaponCharge -= WeaponProjectileCost;
-			
+			// WeaponCharge -= WeaponProjectileCost;
 		}
 	}
 }
@@ -291,150 +289,18 @@ void UCombatComponent::StartFireTimer()
 	}
 }
 
-void UCombatComponent::StartBeamTimer()
-{
-	if(ZCharacter)
-	{
-		ZCharacter->GetWorldTimerManager().SetTimer(BeamTimer, this, &UCombatComponent::BeamTimerFinished, BeamFireDelay);
-	}
-}
-
 void UCombatComponent::FireTimerFinished()
 {
-	bCanFire = true;
-	if(bFireButtonPressed)
+	if(!ZCharacter->bUsingBeamAttack)
+	{
+		bCanFire = true;
+	}
+	if(bFireButtonPressed && bCanFire)
 	{
 		bCanFire=false;
 		SetBackwardsMovementTarget();
 		LaunchProjectile(CrosshairsTarget);
 		StartFireTimer();
 	}
-}
-
-void UCombatComponent::BeamTimerFinished()
-{
-	bCanFire = true;
-	if(bBeamButtonHeld)
-	{
-		bHeldFire = true;
-		StartBeamAttack();
-	}
-	else if(bHeldFire)
-	{
-		BeamAttackFinished();
-		bHeldFire = false;
-	}
-}
-
-void UCombatComponent::StartBeamAttack()
-{
-	if(!ZCharacter) return;
-	bCanFire=false;
-	ZCharacter->bUsingBeamAttack = true;
-
-	SetBackwardsMovementTarget();
-	StartBeamTimer();
-	
-	UAnimInstance* AnimInstance = ZCharacter->GetMesh()->GetAnimInstance();
-
-	if(bHeldFire)
-	{
-		if(ZCharacter->GetAttackMontage() && AnimInstance)
-		{
-			const float DeltaTimeSeconds = UGameplayStatics::GetWorldDeltaSeconds(GetWorld());
-			AnimInstance->Montage_Play(ZCharacter->GetAttackMontage());
-			AnimInstance->Montage_JumpToSection("BeamHold");
-			WeaponCharge -= WeaponDrainRate * DeltaTimeSeconds;
-		}
-	}
-	else
-	{
-		if(ZCharacter->GetAttackMontage() && AnimInstance)
-        {
-        	AnimInstance->Montage_Play(ZCharacter->GetAttackMontage());
-        	AnimInstance->Montage_JumpToSection("Beam");
-        }
-	}
-	
-	const USkeletalMeshSocket* BarrelSocket = ZCharacter->GetMesh()->GetSocketByName("Barrel");
-	if(BarrelSocket)
-	{
-		SocketTransform = BarrelSocket->GetSocketTransform(ZCharacter->GetMesh());
-	}
-	
-	FHitResult Result;
-	WeaponTraceHit(SocketTransform.GetLocation(), CrosshairsTarget, Result);
-}
-
-void UCombatComponent::BeamAttackFinished()
-{
-	if(!ZCharacter) return;
-	ZCharacter->bUsingBeamAttack = false;
-	UAnimInstance* AnimInstance = ZCharacter->GetMesh()->GetAnimInstance();
-	if(ZCharacter->GetAttackMontage() && AnimInstance)
-	{
-		AnimInstance->Montage_Play(ZCharacter->GetAttackMontage());
-		AnimInstance->Montage_JumpToSection("BeamHoldEnd");
-	}
-}
-
-void UCombatComponent::WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& OutHit)
-{
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		const FVector End = TraceStart + (HitTarget - TraceStart) * 1.25;
-		
-		World->LineTraceSingleByChannel(
-			OutHit,
-			TraceStart,
-			End, 
-			ECollisionChannel::ECC_Visibility
-			);
-
-		FVector BeamEnd = End;
-		FVector BeamHitNormals;
-		
-		if(OutHit.bBlockingHit && OutHit.GetActor() != GetOwner())
-		{
-			BeamEnd= OutHit.ImpactPoint;
-			BeamHitNormals = OutHit.Normal;
-
-			IDamageable* DamageableObject = Cast<IDamageable>(OutHit.GetActor());
-			if(DamageableObject)
-			{
-				const UDamageType* DamageType{};
-				DamageableObject->AddDamage(OutHit.GetActor(), BeamDamageAmount, DamageType, nullptr, GetOwner());
-				UE_LOG(LogTemp, Warning, TEXT("Hit Character : %s , Damage Applied : %f"), *OutHit.GetActor()->GetName(), BeamDamageAmount);
-			}
-		}
-		
-		// DrawDebugSphere(GetWorld(), BeamEnd, 16.f, 12, FColor::Magenta, false, -1);
-		
-		if(BeamSystem)
-		{
-			UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(World, BeamSystem, TraceStart, FRotator::ZeroRotator, true);
-			if(Beam)
-			{
-				Beam->SetVectorParameter(FName("Target"), BeamEnd);
-			}
-		}
-		
-		
-		
-		if(BeamImpactParticles && BeamEnd != End)
-		{
-			UParticleSystemComponent* BeamImpact = UGameplayStatics::SpawnEmitterAtLocation(World, BeamImpactParticles, BeamEnd, BeamHitNormals.Rotation(), true);
-		}
-		if(BeamImpactSound && BeamEnd != End )
-		{
-			UGameplayStatics::PlaySoundAtLocation(World, BeamImpactSound, BeamEnd);
-		}
-	}
-}
-
-float UCombatComponent::GetWeaponChargePercentage()
-{
-	return WeaponCharge / WeaponChargeMax;
 }
 
