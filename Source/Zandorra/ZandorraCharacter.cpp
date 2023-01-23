@@ -62,12 +62,9 @@ void AZandorraCharacter::BeginPlay()
 
 	OnTakeAnyDamage.AddDynamic(this, &AZandorraCharacter::AddDamage);
 	SetCanFireDelegate.BindUFunction(CombatComponent, "SetCanFire");
-	
-}
 
-UBeamAttackComponent* AZandorraCharacter::GetBeamAttackComponent()
-{
-	return nullptr;
+	GetCharacterMovement()->MaxWalkSpeed = DefaultMaxWalkSpeed;
+	
 }
 
 void AZandorraCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -88,6 +85,9 @@ void AZandorraCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	PlayerInputComponent->BindTouch(IE_Pressed, this, &AZandorraCharacter::TouchStarted);
 	PlayerInputComponent->BindTouch(IE_Released, this, &AZandorraCharacter::TouchStopped);
 
+	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AZandorraCharacter::SprintButtonPressed);
+	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AZandorraCharacter::SprintButtonReleased);
+
 	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &AZandorraCharacter::AimButtonPressed);
 	PlayerInputComponent->BindAction("Aim", IE_Released, this, &AZandorraCharacter::AimButtonReleased);
 
@@ -96,6 +96,35 @@ void AZandorraCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 
 	PlayerInputComponent->BindAction("Beam", IE_Pressed, this, &AZandorraCharacter::AbilityButtonPressed);
 	PlayerInputComponent->BindAction("Beam", IE_Released, this, &AZandorraCharacter::AbilityButtonReleased);
+}
+
+void AZandorraCharacter::SetStaminaDrainRate(float DeltaSeconds)
+{
+	switch (CharacterMovementState)
+	{
+	
+	case ECharacterMovementState::ECMS_Idle:
+		Stamina += StaminaRegenRate  * DeltaSeconds;
+		Stamina = FMath::Clamp(Stamina, 0, MaxStamina);
+		break;
+	case ECharacterMovementState::ECMS_Sprinting:
+		if(GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f)
+		{
+				Stamina -= StaminaDrainRate * DeltaSeconds;
+		}
+		if(Stamina <= 0.f)
+		{
+			CharacterMovementState = ECharacterMovementState::ECMS_Idle;
+			GetCharacterMovement()->MaxWalkSpeed = DefaultMaxWalkSpeed;
+		}
+		break;
+	case ECharacterMovementState::ECMS_Stunned:
+		
+		break;
+	case ECharacterMovementState::ECMS_MAX:
+		break;
+	default: ;
+	}
 }
 
 void AZandorraCharacter::Tick(float DeltaSeconds)
@@ -108,6 +137,8 @@ void AZandorraCharacter::Tick(float DeltaSeconds)
 	{
 		CrosshairsTarget=CombatComponent->GetCrosshairsTarget();
 	}
+
+	SetStaminaDrainRate(DeltaSeconds);
 	
 }
 
@@ -125,7 +156,6 @@ void AZandorraCharacter::PostInitializeComponents()
 	}
 }
 
-
 void AZandorraCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
 {
 	Jump();
@@ -134,6 +164,34 @@ void AZandorraCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Loc
 void AZandorraCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)
 {
 	StopJumping();
+}
+
+UBeamAttackComponent* AZandorraCharacter::GetBeamAttackComponent()
+{
+	return nullptr;
+}
+
+float AZandorraCharacter::GetStaminaPercentage()
+{
+	return Stamina / MaxStamina;
+}
+
+void AZandorraCharacter::SprintButtonPressed()
+{
+	if(GetCharacterMovement())
+	{
+		CharacterMovementState = ECharacterMovementState::ECMS_Sprinting;
+		GetCharacterMovement()->MaxWalkSpeed = SprintMaxWalkSpeed;
+	}
+}
+
+void AZandorraCharacter::SprintButtonReleased()
+{
+	if(GetCharacterMovement())
+	{
+		CharacterMovementState = ECharacterMovementState::ECMS_Idle;
+		GetCharacterMovement()->MaxWalkSpeed = DefaultMaxWalkSpeed;
+	}
 }
 
 void AZandorraCharacter::AimButtonPressed()
@@ -156,6 +214,10 @@ void AZandorraCharacter::AimButtonReleased()
 
 void AZandorraCharacter::FireButtonPressed()
 {
+	if(CharacterMovementState != ECharacterMovementState::ECMS_Idle)
+	{
+		return;
+	}
 	if (CombatComponent)
 	{
 		CombatComponent->FireWeaponPressed(true);
@@ -172,6 +234,10 @@ void AZandorraCharacter::FireButtonReleased()
 
 void AZandorraCharacter::AbilityButtonPressed()
 {
+	if(CharacterMovementState != ECharacterMovementState::ECMS_Idle)
+	{
+		return;
+	}
 	bAbilityButtonHeld = true;
 	if (CombatComponent)
 	{

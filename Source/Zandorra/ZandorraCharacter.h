@@ -10,6 +10,16 @@
 
 DECLARE_DELEGATE_OneParam(FSetCanFireDelegate, bool);
 
+UENUM(BlueprintType)
+enum class ECharacterMovementState : uint8
+{
+	ECMS_Idle UMETA(DisplayName = "Idle"),
+	ECMS_Sprinting UMETA(DisplayName = "Sprinting"),
+	ECMS_Stunned UMETA(DisplayName = "Stunned"),
+
+	ECMS_MAX UMETA(DisplayName= "DefaultMax")
+};
+
 
 UCLASS(config=Game)
 class AZandorraCharacter : public ACharacter, public IInteractWithCrosshairs, public IDamageable
@@ -61,6 +71,9 @@ public:
 	FORCEINLINE FVector GetCrosshairsTarget() const {return CrosshairsTarget; }
 
 	virtual class UBeamAttackComponent* GetBeamAttackComponent();
+
+	UFUNCTION(BlueprintGetter)
+	float GetStaminaPercentage();
 	
 protected:
 
@@ -69,6 +82,7 @@ protected:
 	 */
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	void SetStaminaDrainRate(float DeltaSeconds);
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void BeginPlay() override;
 
@@ -83,11 +97,17 @@ protected:
 	void TouchStarted(ETouchIndex::Type FingerIndex, FVector Location);
 	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
 
+	void SprintButtonPressed();
+	void SprintButtonReleased();
+	
+	
 	void AimButtonPressed();
 	void AimButtonReleased();
 
 	void FireButtonPressed();
 	void FireButtonReleased();
+
+	
 
 	virtual void AbilityButtonPressed();
 	virtual void AbilityButtonReleased();
@@ -118,12 +138,24 @@ protected:
 	class UAnimMontage* AttackMontage;
 	
 	bool bAiming = false;
-
+	UPROPERTY(EditAnywhere)
+	float DefaultMaxWalkSpeed =450.f;
+	UPROPERTY(EditAnywhere)
+	float AdjustedMaxWalkSpeed = 200.f;
+	UPROPERTY(EditAnywhere)
+	float SprintMaxWalkSpeed =600.f;
 	UPROPERTY(EditAnywhere)
 	float Stamina;
 
 	UPROPERTY(EditAnywhere)
 	float MaxStamina;
+
+	UPROPERTY(EditAnywhere)
+	float StaminaDrainRate = 10.f;
+	UPROPERTY(EditAnywhere)
+	float StaminaRegenRate = 8.f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
+	ECharacterMovementState CharacterMovementState = ECharacterMovementState::ECMS_Idle;
 	
 private:
 

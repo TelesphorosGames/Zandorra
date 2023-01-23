@@ -267,11 +267,9 @@ void UCombatComponent::LaunchProjectile(const FVector& HitTarget)
             
 			FActorSpawnParameters SpawnParams;
 			SpawnParams.Owner = GetOwner();
-			
             
 			World->SpawnActor<AProjectile>(ProjectileClass, SocketTransform.GetLocation(), TargetRotation, SpawnParams);
-
-			// WeaponCharge -= WeaponProjectileCost;
+			
 		}
 	}
 }
