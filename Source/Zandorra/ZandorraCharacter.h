@@ -16,6 +16,7 @@ enum class ECharacterMovementState : uint8
 	ECMS_Idle UMETA(DisplayName = "Idle"),
 	ECMS_Sprinting UMETA(DisplayName = "Sprinting"),
 	ECMS_Stunned UMETA(DisplayName = "Stunned"),
+	ECMS_LockedOn UMETA(DisplayName = "LockedOn"),
 
 	ECMS_MAX UMETA(DisplayName= "DefaultMax")
 };
@@ -82,7 +83,7 @@ protected:
 	 */
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	void SetStaminaDrainRate(float DeltaSeconds);
+	void CharacterMovementTick(float DeltaSeconds);
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void BeginPlay() override;
 
@@ -100,17 +101,19 @@ protected:
 	void SprintButtonPressed();
 	void SprintButtonReleased();
 	
-	
 	void AimButtonPressed();
 	void AimButtonReleased();
 
 	void FireButtonPressed();
 	void FireButtonReleased();
 
-	
-
 	virtual void AbilityButtonPressed();
 	virtual void AbilityButtonReleased();
+	bool LockOffButtonPressed();
+	void LockFirstAvailableTarget();
+
+	void LockOnButtonPressed();
+	void SetLockOnCameraRotation(float DeltaSeconds);
 
 	void InterpFOV(float DeltaTime);
 
@@ -156,6 +159,18 @@ protected:
 	float StaminaRegenRate = 8.f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	ECharacterMovementState CharacterMovementState = ECharacterMovementState::ECMS_Idle;
+
+	UPROPERTY(EditDefaultsOnly)
+	class USphereComponent* DamageableDetectionSphere;
+
+	UPROPERTY(VisibleAnywhere)
+	TArray<AActor*> ActorsWithinLockOnRange{};
+
+	int32 LockedOnActorIndex = 0;
+
+	UPROPERTY(VisibleAnywhere)
+	AActor* CurrentlyLockedOnTarget{};
+
 	
 private:
 

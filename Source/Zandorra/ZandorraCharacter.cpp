@@ -11,6 +11,8 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Zandorra.h"
+#include "Components/SphereComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 AZandorraCharacter::AZandorraCharacter()
 {
@@ -29,11 +31,10 @@ AZandorraCharacter::AZandorraCharacter()
 
 	GetCharacterMovement()->JumpZVelocity = 700.f;
 	GetCharacterMovement()->AirControl = 0.35f;
-	GetCharacterMovement()->MaxWalkSpeed = 500.f;
+	GetCharacterMovement()->MaxWalkSpeed = DefaultMaxWalkSpeed;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
-
-
+	
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 400.0f;
@@ -53,6 +54,8 @@ AZandorraCharacter::AZandorraCharacter()
 
 	MaxStamina = 100.f;
 	Stamina = MaxStamina;
+
+	DamageableDetectionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("DamageableDetectionSphere"));
 	
 }
 
@@ -96,35 +99,8 @@ void AZandorraCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 
 	PlayerInputComponent->BindAction("Beam", IE_Pressed, this, &AZandorraCharacter::AbilityButtonPressed);
 	PlayerInputComponent->BindAction("Beam", IE_Released, this, &AZandorraCharacter::AbilityButtonReleased);
-}
 
-void AZandorraCharacter::SetStaminaDrainRate(float DeltaSeconds)
-{
-	switch (CharacterMovementState)
-	{
-	
-	case ECharacterMovementState::ECMS_Idle:
-		Stamina += StaminaRegenRate  * DeltaSeconds;
-		Stamina = FMath::Clamp(Stamina, 0, MaxStamina);
-		break;
-	case ECharacterMovementState::ECMS_Sprinting:
-		if(GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f)
-		{
-				Stamina -= StaminaDrainRate * DeltaSeconds;
-		}
-		if(Stamina <= 0.f)
-		{
-			CharacterMovementState = ECharacterMovementState::ECMS_Idle;
-			GetCharacterMovement()->MaxWalkSpeed = DefaultMaxWalkSpeed;
-		}
-		break;
-	case ECharacterMovementState::ECMS_Stunned:
-		
-		break;
-	case ECharacterMovementState::ECMS_MAX:
-		break;
-	default: ;
-	}
+	PlayerInputComponent->BindAction("LockOn", IE_Pressed, this, &AZandorraCharacter::LockOnButtonPressed);
 }
 
 void AZandorraCharacter::Tick(float DeltaSeconds)
@@ -138,7 +114,7 @@ void AZandorraCharacter::Tick(float DeltaSeconds)
 		CrosshairsTarget=CombatComponent->GetCrosshairsTarget();
 	}
 
-	SetStaminaDrainRate(DeltaSeconds);
+	CharacterMovementTick(DeltaSeconds);
 	
 }
 
@@ -166,7 +142,8 @@ void AZandorraCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Loc
 	StopJumping();
 }
 
-UBeamAttackComponent* AZandorraCharacter::GetBeamAttackComponent()
+// This is overriden in Dekker Player Character Class and returns Dekker's beam attack component
+ UBeamAttackComponent* AZandorraCharacter::GetBeamAttackComponent()
 {
 	return nullptr;
 }
@@ -174,6 +151,42 @@ UBeamAttackComponent* AZandorraCharacter::GetBeamAttackComponent()
 float AZandorraCharacter::GetStaminaPercentage()
 {
 	return Stamina / MaxStamina;
+}
+
+
+void AZandorraCharacter::CharacterMovementTick(float DeltaSeconds)
+{
+	
+	switch (CharacterMovementState)
+	{
+	
+	case ECharacterMovementState::ECMS_Idle:
+		Stamina += StaminaRegenRate  * DeltaSeconds;
+		Stamina = FMath::Clamp(Stamina, 0, MaxStamina);
+		break;
+	case ECharacterMovementState::ECMS_Sprinting:
+		if(GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f)
+		{
+			Stamina -= StaminaDrainRate * DeltaSeconds;
+		}
+		if(Stamina <= 0.f)
+		{
+			CharacterMovementState = ECharacterMovementState::ECMS_Idle;
+			GetCharacterMovement()->MaxWalkSpeed = DefaultMaxWalkSpeed;
+		}
+		break;
+	case ECharacterMovementState::ECMS_Stunned:
+		
+		break;
+	case ECharacterMovementState::ECMS_LockedOn:
+		SetLockOnCameraRotation(DeltaSeconds);
+
+		break;
+		
+	case ECharacterMovementState::ECMS_MAX:
+		break;
+	default: ;
+	}
 }
 
 void AZandorraCharacter::SprintButtonPressed()
@@ -191,6 +204,7 @@ void AZandorraCharacter::SprintButtonReleased()
 	{
 		CharacterMovementState = ECharacterMovementState::ECMS_Idle;
 		GetCharacterMovement()->MaxWalkSpeed = DefaultMaxWalkSpeed;
+		CurrentlyLockedOnTarget = nullptr;
 	}
 }
 
@@ -214,7 +228,7 @@ void AZandorraCharacter::AimButtonReleased()
 
 void AZandorraCharacter::FireButtonPressed()
 {
-	if(CharacterMovementState != ECharacterMovementState::ECMS_Idle)
+	if(CharacterMovementState == ECharacterMovementState::ECMS_Sprinting || CharacterMovementState == ECharacterMovementState::ECMS_Stunned)
 	{
 		return;
 	}
@@ -234,7 +248,7 @@ void AZandorraCharacter::FireButtonReleased()
 
 void AZandorraCharacter::AbilityButtonPressed()
 {
-	if(CharacterMovementState != ECharacterMovementState::ECMS_Idle)
+	if(CharacterMovementState == ECharacterMovementState::ECMS_Sprinting || CharacterMovementState == ECharacterMovementState::ECMS_Stunned)
 	{
 		return;
 	}
@@ -253,6 +267,86 @@ void AZandorraCharacter::AbilityButtonReleased()
 	{
 		CombatComponent->AbilityButtonPressed(false);
 	}
+}
+
+bool AZandorraCharacter::LockOffButtonPressed()
+{
+	if(CharacterMovementState == ECharacterMovementState::ECMS_LockedOn)
+	{
+		CharacterMovementState = ECharacterMovementState::ECMS_Idle;
+		CurrentlyLockedOnTarget = nullptr;
+		return true;
+	}
+	return false;
+}
+
+void AZandorraCharacter::LockFirstAvailableTarget()
+{
+	CurrentlyLockedOnTarget = ActorsWithinLockOnRange[0];
+	LockedOnActorIndex = 0;
+	CharacterMovementState = ECharacterMovementState::ECMS_LockedOn;
+	UE_LOG(LogTemp, Warning, TEXT("Currently Locked Onto : %s"), *CurrentlyLockedOnTarget->GetName());
+}
+
+void AZandorraCharacter::LockOnButtonPressed()
+{
+	// Check to see which actors are overlapping our Damagable Detection Sphere
+	DamageableDetectionSphere->GetOverlappingActors(ActorsWithinLockOnRange);
+	// None? return
+	if(ActorsWithinLockOnRange.Num() == 0)
+	{
+		return;
+	}
+	// One? Set our Currently locked target to it
+	if(ActorsWithinLockOnRange.Num()==1)
+	{
+		if(ActorsWithinLockOnRange[0] != CurrentlyLockedOnTarget)
+        {
+        	LockFirstAvailableTarget();
+        }
+	}
+	if(ActorsWithinLockOnRange.Num()>1)
+	{
+		if(ActorsWithinLockOnRange[LockedOnActorIndex] == CurrentlyLockedOnTarget)
+		{
+			LockedOnActorIndex++;
+			if(ActorsWithinLockOnRange.Num() == LockedOnActorIndex)
+			{
+				CurrentlyLockedOnTarget = ActorsWithinLockOnRange[0];
+				LockedOnActorIndex = 0;
+				CharacterMovementState = ECharacterMovementState::ECMS_LockedOn;
+				UE_LOG(LogTemp, Warning, TEXT("Currently Locked Onto : %s"), *CurrentlyLockedOnTarget->GetName());
+			}
+			CurrentlyLockedOnTarget = ActorsWithinLockOnRange[LockedOnActorIndex];
+			
+			CharacterMovementState = ECharacterMovementState::ECMS_LockedOn;
+			UE_LOG(LogTemp, Warning, TEXT("Currently Locked Onto : %s"), *CurrentlyLockedOnTarget->GetName());
+		}
+		else if(ActorsWithinLockOnRange[0] != CurrentlyLockedOnTarget)
+		{
+			CurrentlyLockedOnTarget = ActorsWithinLockOnRange[0];
+			LockedOnActorIndex = 0;
+			CharacterMovementState = ECharacterMovementState::ECMS_LockedOn;
+			UE_LOG(LogTemp, Warning, TEXT("Currently Locked Onto : %s"), *CurrentlyLockedOnTarget->GetName());
+		}
+	}
+	
+	
+}
+
+void AZandorraCharacter::SetLockOnCameraRotation(float DeltaSeconds)
+{
+	const FRotator LookAtRotation = (CurrentlyLockedOnTarget->GetActorLocation() - GetActorLocation()).Rotation();
+	FRotator InterpRotation = FMath::RInterpTo(GetActorRotation(), LookAtRotation, DeltaSeconds, 12.f);
+	InterpRotation.Pitch = 0.f;
+	SetActorRotation(InterpRotation);
+		
+	const FRotator CurrentCamSpot = GetControlRotation();
+	const FRotator CameraLookAtRotation = UKismetMathLibrary::FindLookAtRotation(FollowCamera->GetComponentLocation(), CurrentlyLockedOnTarget->GetActorLocation());
+	const FRotator InterpToCamSpot = FMath::RInterpTo(CurrentCamSpot, CameraLookAtRotation, DeltaSeconds, 12.f);
+	Controller->SetControlRotation(InterpToCamSpot);
+
+	UE_LOG(LogTemp, Warning, TEXT("WTF?"));
 }
 
 void AZandorraCharacter::InterpFOV(float DeltaTime)

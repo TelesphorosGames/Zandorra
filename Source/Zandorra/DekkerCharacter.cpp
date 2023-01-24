@@ -24,7 +24,7 @@ UBeamAttackComponent* ADekkerCharacter::GetBeamAttackComponent()
 void ADekkerCharacter::AbilityButtonPressed()
 {
 	Super::AbilityButtonPressed();
-	if(CharacterMovementState != ECharacterMovementState::ECMS_Idle)
+	if(CharacterMovementState == ECharacterMovementState::ECMS_Sprinting || CharacterMovementState == ECharacterMovementState::ECMS_Stunned)
 	{
 		return;
 	}
