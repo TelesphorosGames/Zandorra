@@ -56,7 +56,7 @@ AZandorraCharacter::AZandorraCharacter()
 	Stamina = MaxStamina;
 
 	DamageableDetectionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("DamageableDetectionSphere"));
-	
+	DamageableDetectionSphere->SetupAttachment(RootComponent);
 }
 
 void AZandorraCharacter::BeginPlay()
@@ -292,6 +292,7 @@ void AZandorraCharacter::LockOnButtonPressed()
 {
 	// Check to see which actors are overlapping our Damagable Detection Sphere
 	DamageableDetectionSphere->GetOverlappingActors(ActorsWithinLockOnRange);
+	ActorsWithinLockOnRange.Remove(this);
 	// None? return
 	if(ActorsWithinLockOnRange.Num() == 0)
 	{
@@ -305,33 +306,35 @@ void AZandorraCharacter::LockOnButtonPressed()
         	LockFirstAvailableTarget();
         }
 	}
+	// More that one? Cycle through the targets
 	if(ActorsWithinLockOnRange.Num()>1)
 	{
+		// Ensure that we do not try to access a target outside of our array's bounds
+		if(ActorsWithinLockOnRange.Num() == LockedOnActorIndex)
+		{
+			LockFirstAvailableTarget();
+		}
+		
 		if(ActorsWithinLockOnRange[LockedOnActorIndex] == CurrentlyLockedOnTarget)
 		{
 			LockedOnActorIndex++;
+			
+			// Ensure that we do not try to access a target outside of our array's bounds
 			if(ActorsWithinLockOnRange.Num() == LockedOnActorIndex)
 			{
-				CurrentlyLockedOnTarget = ActorsWithinLockOnRange[0];
-				LockedOnActorIndex = 0;
-				CharacterMovementState = ECharacterMovementState::ECMS_LockedOn;
-				UE_LOG(LogTemp, Warning, TEXT("Currently Locked Onto : %s"), *CurrentlyLockedOnTarget->GetName());
+				LockFirstAvailableTarget();
 			}
-			CurrentlyLockedOnTarget = ActorsWithinLockOnRange[LockedOnActorIndex];
 			
+			CurrentlyLockedOnTarget = ActorsWithinLockOnRange[LockedOnActorIndex];
 			CharacterMovementState = ECharacterMovementState::ECMS_LockedOn;
 			UE_LOG(LogTemp, Warning, TEXT("Currently Locked Onto : %s"), *CurrentlyLockedOnTarget->GetName());
 		}
+		// Ensure our locked on actor index matches our ActorsWithinLockOnRange index after Un-Locking
 		else if(ActorsWithinLockOnRange[0] != CurrentlyLockedOnTarget)
 		{
-			CurrentlyLockedOnTarget = ActorsWithinLockOnRange[0];
-			LockedOnActorIndex = 0;
-			CharacterMovementState = ECharacterMovementState::ECMS_LockedOn;
-			UE_LOG(LogTemp, Warning, TEXT("Currently Locked Onto : %s"), *CurrentlyLockedOnTarget->GetName());
+			LockFirstAvailableTarget();
 		}
 	}
-	
-	
 }
 
 void AZandorraCharacter::SetLockOnCameraRotation(float DeltaSeconds)
@@ -346,7 +349,6 @@ void AZandorraCharacter::SetLockOnCameraRotation(float DeltaSeconds)
 	const FRotator InterpToCamSpot = FMath::RInterpTo(CurrentCamSpot, CameraLookAtRotation, DeltaSeconds, 12.f);
 	Controller->SetControlRotation(InterpToCamSpot);
 
-	UE_LOG(LogTemp, Warning, TEXT("WTF?"));
 }
 
 void AZandorraCharacter::InterpFOV(float DeltaTime)

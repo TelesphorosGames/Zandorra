@@ -161,7 +161,7 @@ protected:
 	ECharacterMovementState CharacterMovementState = ECharacterMovementState::ECMS_Idle;
 
 	UPROPERTY(EditDefaultsOnly)
-	class USphereComponent* DamageableDetectionSphere;
+	class USphereComponent* DamageableDetectionSphere{};
 
 	UPROPERTY(VisibleAnywhere)
 	TArray<AActor*> ActorsWithinLockOnRange{};
