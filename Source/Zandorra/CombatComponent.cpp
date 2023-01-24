@@ -3,6 +3,7 @@
 
 #include "CombatComponent.h"
 
+#include "BeamAttackComponent.h"
 #include "InteractWithCrosshairs.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Projectile.h"
@@ -57,6 +58,7 @@ void UCombatComponent::BeginPlay()
 	{
 		SocketTransform = BarrelSocket->GetSocketTransform(ZCharacter->GetMesh());
 	}
+	
             
 }
 
@@ -209,7 +211,7 @@ bool UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 
 void UCombatComponent::SetBackwardsMovementTarget()
 {
-	if(ZCharacter->GetVelocity().Size() > 0 && ZCharacter->MoveForwardAxisValue <= -.3f)
+	if(ZCharacter->GetVelocity().Size() > 0 && ZCharacter->MoveForwardAxisValue <= -.3f && ZCharacter->GetCharacterMovementState() != ECharacterMovementState::ECMS_LockedOn)
 	{
 		const USkeletalMeshSocket* BarrelSocket = ZCharacter->GetMesh()->GetSocketByName("Barrel");
 		if(BarrelSocket)

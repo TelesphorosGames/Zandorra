@@ -56,7 +56,6 @@ public:
 	bool bUsingBeamAttack = false;
 	UPROPERTY()
 	bool bAbilityButtonHeld = false;
-		
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	class UHealthComponent* HealthComponent;
@@ -70,6 +69,7 @@ public:
 	FORCEINLINE UAnimMontage* GetAttackMontage() const {return AttackMontage; }
 	FORCEINLINE class UCombatComponent* GetCombatComponent() const {return CombatComponent; }
 	FORCEINLINE FVector GetCrosshairsTarget() const {return CrosshairsTarget; }
+	FORCEINLINE ECharacterMovementState GetCharacterMovementState() const {return CharacterMovementState; }
 
 	virtual class UBeamAttackComponent* GetBeamAttackComponent();
 

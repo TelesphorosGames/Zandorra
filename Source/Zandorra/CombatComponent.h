@@ -115,5 +115,4 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AProjectile> ProjectileClass;
 
-
 };

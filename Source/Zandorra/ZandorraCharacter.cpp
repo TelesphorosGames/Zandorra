@@ -111,7 +111,14 @@ void AZandorraCharacter::Tick(float DeltaSeconds)
 	
 	if(CombatComponent)
 	{
-		CrosshairsTarget=CombatComponent->GetCrosshairsTarget();
+		if(CharacterMovementState == ECharacterMovementState::ECMS_LockedOn)
+		{
+			CrosshairsTarget=CurrentlyLockedOnTarget->GetActorLocation();
+		}
+		else
+		{
+			CrosshairsTarget=CombatComponent->GetCrosshairsTarget();
+		}
 	}
 
 	CharacterMovementTick(DeltaSeconds);
@@ -126,10 +133,6 @@ void AZandorraCharacter::PostInitializeComponents()
 	{
 		CombatComponent->ZCharacter = this;
 	}
-	if(HealthComponent)
-	{
-	
-	}
 }
 
 void AZandorraCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
@@ -140,6 +143,46 @@ void AZandorraCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Loc
 void AZandorraCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)
 {
 	StopJumping();
+}
+
+void AZandorraCharacter::TurnAtRate(float Rate)
+{
+	AddControllerYawInput(Rate * TurnRateGamepad * GetWorld()->GetDeltaSeconds());
+}
+
+void AZandorraCharacter::LookUpAtRate(float Rate)
+{
+
+	AddControllerPitchInput(Rate * TurnRateGamepad * GetWorld()->GetDeltaSeconds());
+
+}
+
+void AZandorraCharacter::MoveForward(float Value)
+{
+	if ((Controller != nullptr) && (Value != 0.0f))
+	{
+		// find out which way is forward
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		AddMovementInput(Direction, Value);
+	}
+	MoveForwardAxisValue = Value;
+}
+
+void AZandorraCharacter::MoveRight(float Value)
+{
+	if ((Controller != nullptr) && (Value != 0.0f))
+	{
+
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+		AddMovementInput(Direction, Value);
+	}
 }
 
 // This is overriden in Dekker Player Character Class and returns Dekker's beam attack component
@@ -191,6 +234,10 @@ void AZandorraCharacter::CharacterMovementTick(float DeltaSeconds)
 
 void AZandorraCharacter::SprintButtonPressed()
 {
+	if(bUsingBeamAttack)
+	{
+		return;
+	}
 	if(GetCharacterMovement())
 	{
 		CharacterMovementState = ECharacterMovementState::ECMS_Sprinting;
@@ -285,6 +332,7 @@ void AZandorraCharacter::LockFirstAvailableTarget()
 	CurrentlyLockedOnTarget = ActorsWithinLockOnRange[0];
 	LockedOnActorIndex = 0;
 	CharacterMovementState = ECharacterMovementState::ECMS_LockedOn;
+	GetCharacterMovement()->MaxWalkSpeed = AdjustedMaxWalkSpeed;
 	UE_LOG(LogTemp, Warning, TEXT("Currently Locked Onto : %s"), *CurrentlyLockedOnTarget->GetName());
 }
 
@@ -292,29 +340,25 @@ void AZandorraCharacter::LockOnButtonPressed()
 {
 	// Check to see which actors are overlapping our Damagable Detection Sphere
 	DamageableDetectionSphere->GetOverlappingActors(ActorsWithinLockOnRange);
+
+	// TODO : add enemy class TSubClassOf for filtering overlapping actors
+	//Remove this character (later edit with Enemy class filter)
 	ActorsWithinLockOnRange.Remove(this);
 	// None? return
 	if(ActorsWithinLockOnRange.Num() == 0)
 	{
 		return;
 	}
-	// One? Set our Currently locked target to it
-	if(ActorsWithinLockOnRange.Num()==1)
-	{
-		if(ActorsWithinLockOnRange[0] != CurrentlyLockedOnTarget)
-        {
-        	LockFirstAvailableTarget();
-        }
-	}
-	// More that one? Cycle through the targets
-	if(ActorsWithinLockOnRange.Num()>1)
+	
+	// One or More? Cycle through the targets
+	if(ActorsWithinLockOnRange.Num()>=1)
 	{
 		// Ensure that we do not try to access a target outside of our array's bounds
 		if(ActorsWithinLockOnRange.Num() == LockedOnActorIndex)
 		{
 			LockFirstAvailableTarget();
 		}
-		
+		// If We are currently locked onto the correct index of the actor in the 'within range' array, increase the index cound and lock on to the next actor
 		if(ActorsWithinLockOnRange[LockedOnActorIndex] == CurrentlyLockedOnTarget)
 		{
 			LockedOnActorIndex++;
@@ -327,6 +371,7 @@ void AZandorraCharacter::LockOnButtonPressed()
 			
 			CurrentlyLockedOnTarget = ActorsWithinLockOnRange[LockedOnActorIndex];
 			CharacterMovementState = ECharacterMovementState::ECMS_LockedOn;
+			GetCharacterMovement()->MaxWalkSpeed = AdjustedMaxWalkSpeed;
 			UE_LOG(LogTemp, Warning, TEXT("Currently Locked Onto : %s"), *CurrentlyLockedOnTarget->GetName());
 		}
 		// Ensure our locked on actor index matches our ActorsWithinLockOnRange index after Un-Locking
@@ -367,45 +412,6 @@ void AZandorraCharacter::InterpFOV(float DeltaTime)
 	}
 }
 
-void AZandorraCharacter::TurnAtRate(float Rate)
-{
-	AddControllerYawInput(Rate * TurnRateGamepad * GetWorld()->GetDeltaSeconds());
-}
-
-void AZandorraCharacter::LookUpAtRate(float Rate)
-{
-
-	AddControllerPitchInput(Rate * TurnRateGamepad * GetWorld()->GetDeltaSeconds());
-
-}
-
-void AZandorraCharacter::MoveForward(float Value)
-{
-	if ((Controller != nullptr) && (Value != 0.0f))
-	{
-		// find out which way is forward
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Value);
-	}
-	MoveForwardAxisValue = Value;
-}
-
-void AZandorraCharacter::MoveRight(float Value)
-{
-	if ((Controller != nullptr) && (Value != 0.0f))
-	{
-
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-		AddMovementInput(Direction, Value);
-	}
-}
 
 void AZandorraCharacter::TakeCharacterDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
 	AController* InstigatedBy, AActor* DamageCauser)
@@ -413,8 +419,9 @@ void AZandorraCharacter::TakeCharacterDamage(AActor* DamagedActor, float Damage,
 	
 }
 
+
 void AZandorraCharacter::AddDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
-	AController* InstigatedBy, AActor* DamageCauser)
+                                   AController* InstigatedBy, AActor* DamageCauser)
 {
 	if(HealthComponent)
 	{
@@ -422,3 +429,13 @@ void AZandorraCharacter::AddDamage(AActor* DamagedActor, float Damage, const UDa
 	}
 }
 
+
+
+// if(ActorsWithinLockOnRange.Num()==1)
+// {
+// 	// Currently not locked to the first actor in the array?
+// 	if(ActorsWithinLockOnRange[0] != CurrentlyLockedOnTarget)
+//        {
+//        	LockFirstAvailableTarget();
+//        }
+// }

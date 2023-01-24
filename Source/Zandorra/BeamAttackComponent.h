@@ -22,12 +22,19 @@ public:
 	void StartBeamAttack();
 	void BeamAttackFinished();
 
+	UFUNCTION()
+	void AdjustWeaponCharge(float AmountToAdjustBy);
+
 	
 	UPROPERTY()
 	class AZandorraCharacter* ZCharacter{};
 
 	UPROPERTY()
 	class UCombatComponent* CombatComponent{};
+
+	
+	UFUNCTION(BlueprintGetter)
+	float GetWeaponChargePercentage();
 
 protected:
 
@@ -49,6 +56,9 @@ private:
 	float BeamDamageAmount =.5f;
 
 	UPROPERTY(EditAnywhere)
+	float BeamEnergyCost = .5f;
+
+	UPROPERTY(EditAnywhere)
 	class UParticleSystem* BeamSystem;
 
 	UPROPERTY(EditAnywhere)
@@ -64,16 +74,11 @@ private:
 	
 	UPROPERTY(EditAnywhere)
 	float WeaponChargeMax;
-
-	UFUNCTION(BlueprintGetter)
-	float GetWeaponChargePercentage();
 	
-	// To be multiplied be delta time , amount per second
 	UPROPERTY(EditAnywhere)
 	float WeaponDrainRate=10.f;
 	
 	UPROPERTY(EditAnywhere)
 	float WeaponProjectileCost=2.f;
-		
 		
 };

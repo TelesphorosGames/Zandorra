@@ -51,10 +51,17 @@ void UBeamAttackComponent::BeamTimerFinished()
 
 void UBeamAttackComponent::StartBeamAttack()
 {
+	
 	if(!ZCharacter) return;
+
+	if(WeaponCharge <=0.f)
+	{
+		BeamAttackFinished();
+		return;
+	}
 	
 	ZCharacter->bUsingBeamAttack = true;
-	
+	WeaponCharge -= BeamEnergyCost;
 	StartBeamTimer();
 	
 	UAnimInstance* AnimInstance = ZCharacter->GetMesh()->GetAnimInstance();
@@ -83,7 +90,7 @@ void UBeamAttackComponent::StartBeamAttack()
 		FTransform BarrelSocketTransform = BarrelSocket->GetSocketTransform(ZCharacter->GetMesh());
 		FHitResult Result;
 
-		if(ZCharacter->GetVelocity().Size() > 0 && ZCharacter->MoveForwardAxisValue <= -.3f)
+		if(ZCharacter->GetVelocity().Size() > 0 && ZCharacter->MoveForwardAxisValue <= -.3f && ZCharacter->GetCharacterMovementState() != ECharacterMovementState::ECMS_LockedOn)
 		{
 			const FVector BarrelEnd = BarrelSocketTransform.GetLocation() + (BarrelSocketTransform.GetUnitAxis(EAxis::X) *5000);
 			WeaponTraceHit(BarrelSocketTransform.GetLocation(), BarrelEnd, Result);
@@ -103,6 +110,10 @@ void UBeamAttackComponent::BeamAttackFinished()
 		AnimInstance->Montage_Play(ZCharacter->GetAttackMontage());
 		AnimInstance->Montage_JumpToSection("BeamHoldEnd");
 	}
+}
+
+void UBeamAttackComponent::AdjustWeaponCharge(float AmountToAdjustBy)
+{
 }
 
 void UBeamAttackComponent::WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& OutHit)
