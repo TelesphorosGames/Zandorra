@@ -271,7 +271,7 @@ void UCombatComponent::LaunchProjectile(const FVector& HitTarget)
 			SpawnParams.Owner = GetOwner();
             
 			World->SpawnActor<AProjectile>(ProjectileClass, SocketTransform.GetLocation(), TargetRotation, SpawnParams);
-			
+			GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(ZCharacter->FiringCameraShake);
 		}
 	}
 }

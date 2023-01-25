@@ -61,6 +61,12 @@ public:
 	class UHealthComponent* HealthComponent;
 	
 	FSetCanFireDelegate SetCanFireDelegate;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UCameraShakeBase> FiringCameraShake;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UCameraShakeBase> MovementCameraShake;
 	
 	/* GETTERS AND SETTERS
 	 */
@@ -170,6 +176,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	AActor* CurrentlyLockedOnTarget{};
+
 
 	
 private:

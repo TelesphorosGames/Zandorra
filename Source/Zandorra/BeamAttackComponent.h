@@ -24,14 +24,9 @@ public:
 
 	UFUNCTION()
 	void AdjustWeaponCharge(float AmountToAdjustBy);
-
 	
 	UPROPERTY()
 	class AZandorraCharacter* ZCharacter{};
-
-	UPROPERTY()
-	class UCombatComponent* CombatComponent{};
-
 	
 	UFUNCTION(BlueprintGetter)
 	float GetWeaponChargePercentage();

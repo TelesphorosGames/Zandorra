@@ -11,6 +11,7 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Zandorra.h"
+#include "Camera/CameraAnim.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -57,6 +58,7 @@ AZandorraCharacter::AZandorraCharacter()
 
 	DamageableDetectionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("DamageableDetectionSphere"));
 	DamageableDetectionSphere->SetupAttachment(RootComponent);
+	
 }
 
 void AZandorraCharacter::BeginPlay()
@@ -169,6 +171,8 @@ void AZandorraCharacter::MoveForward(float Value)
 		AddMovementInput(Direction, Value);
 	}
 	MoveForwardAxisValue = Value;
+
+	
 }
 
 void AZandorraCharacter::MoveRight(float Value)
@@ -211,6 +215,7 @@ void AZandorraCharacter::CharacterMovementTick(float DeltaSeconds)
 		if(GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f)
 		{
 			Stamina -= StaminaDrainRate * DeltaSeconds;
+			GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(MovementCameraShake);
 		}
 		if(Stamina <= 0.f)
 		{
@@ -242,6 +247,7 @@ void AZandorraCharacter::SprintButtonPressed()
 	{
 		CharacterMovementState = ECharacterMovementState::ECMS_Sprinting;
 		GetCharacterMovement()->MaxWalkSpeed = SprintMaxWalkSpeed;
+	
 	}
 }
 
@@ -252,6 +258,7 @@ void AZandorraCharacter::SprintButtonReleased()
 		CharacterMovementState = ECharacterMovementState::ECMS_Idle;
 		GetCharacterMovement()->MaxWalkSpeed = DefaultMaxWalkSpeed;
 		CurrentlyLockedOnTarget = nullptr;
+		
 	}
 }
 

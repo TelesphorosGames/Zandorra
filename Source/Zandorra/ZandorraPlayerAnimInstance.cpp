@@ -3,7 +3,6 @@
 
 #include "ZandorraPlayerAnimInstance.h"
 
-#include "ZandorraCharacter.h"
 #include "Kismet/KismetMathLibrary.h"
 
 UZandorraPlayerAnimInstance::UZandorraPlayerAnimInstance()
