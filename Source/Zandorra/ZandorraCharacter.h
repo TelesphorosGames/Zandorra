@@ -141,10 +141,10 @@ protected:
 	float ZoomInterpSpeed =4.f;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-	class UCombatComponent* CombatComponent;
+	class UCombatComponent* CombatComponent{};
 	
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"))
-	class UAnimMontage* AttackMontage;
+	class UAnimMontage* AttackMontage{};
 	
 	bool bAiming = false;
 	UPROPERTY(EditAnywhere)
