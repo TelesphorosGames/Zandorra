@@ -41,6 +41,7 @@ public:
 	 */
 	UPROPERTY()
 	class AZandorraCharacter* ZCharacter{};
+	
 	// Used to determine which direction the barrel of the weapon should face, depending on which direction character is facing
 	FTransform SocketTransform;
 
