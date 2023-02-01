@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Enemy.generated.h"
 
+
 UCLASS()
 class ZANDORRA_API AEnemy : public ACharacter
 {
@@ -19,6 +20,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
 	
 
 };

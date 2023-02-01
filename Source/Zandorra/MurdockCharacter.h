@@ -16,12 +16,19 @@ class ZANDORRA_API AMurdockCharacter : public AZandorraCharacter
 
 public:
 
+	AMurdockCharacter();
+
+	
 protected:
 
 	
 private:
-
-	UPROPERTY()
-	class UShieldAbilityComponent* ShieldAbilityComponent;
 	
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UShieldAbilityComponent> ShieldAbilityComponent;
+	
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<class UBoxComponent> ShieldCollisionBox;
+	
+		
 };
