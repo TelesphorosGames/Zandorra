@@ -11,5 +11,37 @@ AMurdockCharacter::AMurdockCharacter()
 	ShieldAbilityComponent = CreateDefaultSubobject<UShieldAbilityComponent>(TEXT("ShieldAbilityComponent"));
 
 	ShieldCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("ShieldCollisionBox"));
+	ShieldCollisionBox->SetupAttachment(GetMesh(), "ShieldSocket");
+	ShieldCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+}
 
+void AMurdockCharacter::AbilityButtonPressed()
+{
+	Super::AbilityButtonPressed();
+
+	ShieldAbilityComponent->StartShield();
+	ShieldCollisionBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	
+	if(GetMesh()->GetAnimInstance())
+	{
+		GetMesh()->GetAnimInstance()->Montage_Play(AttackMontage);
+		GetMesh()->GetAnimInstance()->Montage_JumpToSection("ShieldStart", AttackMontage);
+	}
+	
+}
+
+void AMurdockCharacter::AbilityButtonReleased()
+{
+
+	Super::AbilityButtonReleased();
+
+	ShieldAbilityComponent->FinishShield();
+	ShieldCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	if(GetMesh()->GetAnimInstance())
+	{
+		GetMesh()->GetAnimInstance()->Montage_Play(AttackMontage);
+		GetMesh()->GetAnimInstance()->Montage_JumpToSection("ShieldFinish", AttackMontage);
+	}
+	
 }

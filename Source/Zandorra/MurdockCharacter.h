@@ -17,9 +17,13 @@ class ZANDORRA_API AMurdockCharacter : public AZandorraCharacter
 public:
 
 	AMurdockCharacter();
-
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<class UBoxComponent> ShieldCollisionBox;
 	
 protected:
+
+	virtual void AbilityButtonPressed() override;
+	virtual void AbilityButtonReleased() override;
 
 	
 private:
@@ -27,8 +31,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UShieldAbilityComponent> ShieldAbilityComponent;
 	
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<class UBoxComponent> ShieldCollisionBox;
+	
 	
 		
 };

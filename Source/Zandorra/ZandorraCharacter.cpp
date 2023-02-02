@@ -391,14 +391,17 @@ void AZandorraCharacter::LockOnButtonPressed()
 
 void AZandorraCharacter::SetLockOnCameraRotation(float DeltaSeconds)
 {
-	const FRotator LookAtRotation = (CurrentlyLockedOnTarget->GetActorLocation() - GetActorLocation()).Rotation();
-	FRotator InterpRotation = FMath::RInterpTo(GetActorRotation(), LookAtRotation, DeltaSeconds, 12.f);
-	InterpRotation.Pitch = 0.f;
+	FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), CurrentlyLockedOnTarget->GetActorLocation());
+	LookAtRotation.Pitch = 0.f;
+	LookAtRotation.Roll = 0.f;
+	FRotator InterpRotation = FMath::RInterpTo(GetActorRotation(), LookAtRotation, DeltaSeconds, 20.f);
 	SetActorRotation(InterpRotation);
+	
+
 		
 	const FRotator CurrentCamSpot = GetControlRotation();
 	const FRotator CameraLookAtRotation = UKismetMathLibrary::FindLookAtRotation(FollowCamera->GetComponentLocation(), CurrentlyLockedOnTarget->GetActorLocation());
-	const FRotator InterpToCamSpot = FMath::RInterpTo(CurrentCamSpot, CameraLookAtRotation, DeltaSeconds, 12.f);
+	const FRotator InterpToCamSpot = FMath::RInterpTo(CurrentCamSpot, CameraLookAtRotation, DeltaSeconds, 2.f);
 	Controller->SetControlRotation(InterpToCamSpot);
 
 }

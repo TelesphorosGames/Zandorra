@@ -24,7 +24,7 @@ public:
 	void AdjustShieldCharge(float AmountToAdjustBy);
 	
 	UPROPERTY()
-	class AZandorraCharacter* ZCharacter{};
+	class AMurdockCharacter* ZCharacter{};
 	
 	UFUNCTION(BlueprintGetter)
 	float GetShieldChargePercentage();
@@ -34,7 +34,10 @@ protected:
 	virtual void BeginPlay() override;
 	
 	UPROPERTY(EditAnywhere)
-	class UParticleSystemComponent* ShieldSystemComponent;
+	UParticleSystem* ShieldSystem;
+
+	UPROPERTY()
+	UParticleSystemComponent* Shield;
 	
 	UPROPERTY(EditAnywhere)
 	float ShieldCharge;
@@ -44,6 +47,10 @@ protected:
 	
 	UPROPERTY(EditAnywhere)
 	float ShieldDrainRate=10.f;
+
+	UPROPERTY(VisibleAnywhere)
+	bool bShieldActive = false;
+	
 
 
 		
