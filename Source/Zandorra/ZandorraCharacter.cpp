@@ -241,14 +241,19 @@ void AZandorraCharacter::SprintButtonPressed()
 {
 	if(bUsingBeamAttack)
 	{
+		LockOffButtonPressed();
 		return;
 	}
+	LockOffButtonPressed();
+	
 	if(GetCharacterMovement())
 	{
 		CharacterMovementState = ECharacterMovementState::ECMS_Sprinting;
 		GetCharacterMovement()->MaxWalkSpeed = SprintMaxWalkSpeed;
+		
 	
 	}
+	
 }
 
 void AZandorraCharacter::SprintButtonReleased()
@@ -329,6 +334,10 @@ bool AZandorraCharacter::LockOffButtonPressed()
 	{
 		CharacterMovementState = ECharacterMovementState::ECMS_Idle;
 		CurrentlyLockedOnTarget = nullptr;
+		GetCharacterMovement()->bOrientRotationToMovement = true;
+		GetCharacterMovement()->bUseControllerDesiredRotation = false;
+		
+ 
 		return true;
 	}
 	return false;
@@ -340,6 +349,9 @@ void AZandorraCharacter::LockFirstAvailableTarget()
 	LockedOnActorIndex = 0;
 	CharacterMovementState = ECharacterMovementState::ECMS_LockedOn;
 	GetCharacterMovement()->MaxWalkSpeed = AdjustedMaxWalkSpeed;
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	
 	UE_LOG(LogTemp, Warning, TEXT("Currently Locked Onto : %s"), *CurrentlyLockedOnTarget->GetName());
 }
 
@@ -391,17 +403,17 @@ void AZandorraCharacter::LockOnButtonPressed()
 
 void AZandorraCharacter::SetLockOnCameraRotation(float DeltaSeconds)
 {
-	FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), CurrentlyLockedOnTarget->GetActorLocation());
-	LookAtRotation.Pitch = 0.f;
-	LookAtRotation.Roll = 0.f;
-	FRotator InterpRotation = FMath::RInterpTo(GetActorRotation(), LookAtRotation, DeltaSeconds, 20.f);
-	SetActorRotation(InterpRotation);
-	
+	// FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), CurrentlyLockedOnTarget->GetActorLocation());
+	// LookAtRotation.Pitch = 0.f;
+	// LookAtRotation.Roll = 0.f;
+	// FRotator InterpRotation = FMath::RInterpTo(GetActorRotation(), LookAtRotation, DeltaSeconds, 20.f);
+	// SetActorRotation(InterpRotation);
 
-		
+	
 	const FRotator CurrentCamSpot = GetControlRotation();
 	const FRotator CameraLookAtRotation = UKismetMathLibrary::FindLookAtRotation(FollowCamera->GetComponentLocation(), CurrentlyLockedOnTarget->GetActorLocation());
-	const FRotator InterpToCamSpot = FMath::RInterpTo(CurrentCamSpot, CameraLookAtRotation, DeltaSeconds, 2.f);
+	const FRotator InterpToCamSpot = FMath::RInterpTo(CurrentCamSpot, CameraLookAtRotation, DeltaSeconds, 20.f);
+	
 	Controller->SetControlRotation(InterpToCamSpot);
 
 }
