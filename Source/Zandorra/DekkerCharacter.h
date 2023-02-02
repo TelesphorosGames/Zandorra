@@ -28,7 +28,5 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	class UBeamAttackComponent* BeamAttackComponent;
-
-
 	
 };

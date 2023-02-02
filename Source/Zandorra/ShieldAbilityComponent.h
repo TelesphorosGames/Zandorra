@@ -20,9 +20,6 @@ public:
 	void StartShield();
 	void FinishShield();
 
-	UFUNCTION()
-	void AdjustShieldCharge(float AmountToAdjustBy);
-	
 	UPROPERTY()
 	class AMurdockCharacter* ZCharacter{};
 	
@@ -50,8 +47,15 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	bool bShieldActive = false;
-	
 
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class USoundCue> StartShieldSound;
+
+	TObjectPtr<class UAudioComponent> ShieldSoundComponent;
+	
+	UFUNCTION()
+	void AdjustShieldCharge(float AmountToAdjustBy, float DeltaTime);
+	
 
 		
 };

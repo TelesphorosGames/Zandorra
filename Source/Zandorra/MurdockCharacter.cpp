@@ -23,12 +23,6 @@ void AMurdockCharacter::AbilityButtonPressed()
 	ShieldAbilityComponent->StartShield();
 	ShieldCollisionBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	
-	if(GetMesh()->GetAnimInstance())
-	{
-		GetMesh()->GetAnimInstance()->Montage_Play(AttackMontage);
-		GetMesh()->GetAnimInstance()->Montage_JumpToSection("ShieldStart", AttackMontage);
-	}
-	
 }
 
 void AMurdockCharacter::AbilityButtonReleased()
@@ -38,10 +32,5 @@ void AMurdockCharacter::AbilityButtonReleased()
 
 	ShieldAbilityComponent->FinishShield();
 	ShieldCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	if(GetMesh()->GetAnimInstance())
-	{
-		GetMesh()->GetAnimInstance()->Montage_Play(AttackMontage);
-		GetMesh()->GetAnimInstance()->Montage_JumpToSection("ShieldFinish", AttackMontage);
-	}
 	
 }
