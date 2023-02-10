@@ -11,7 +11,6 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Zandorra.h"
-#include "Camera/CameraAnim.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
