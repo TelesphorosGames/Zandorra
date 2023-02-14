@@ -23,6 +23,7 @@ class ZANDORRA_API IDamageable
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
+	UFUNCTION()
 	virtual void AddDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
 	AController* InstigatedBy, AActor* DamageCauser);
 	

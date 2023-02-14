@@ -23,7 +23,8 @@ void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CollisionBox->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
+	// CollisionBox->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
+	ProjectileMovementComponent->OnProjectileStop.AddDynamic(this, &AProjectile::OnStop);
 
 	if(Tracer)
 	{
@@ -89,7 +90,36 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
 		DamageableObject->AddDamage(OtherActor, DamageAmount, DamageType, nullptr, this);
 		// UE_LOG(LogTemp, Warning, TEXT("Hit Character : %s , Damage Applied : %f"), , DamageAmount);
 	}
+	
+	Destroy();
+}
 
+void AProjectile::OnStop(const FHitResult& ImpactResult)
+{
+	if(ImpactParticles && HitPlayerParticles)
+	{
+		if(ImpactResult.Component->GetCollisionObjectType() == ECC_Pawn)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitPlayerParticles, GetActorTransform());
+		}
+		else
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
+		}
+    	
+	}
+	
+	if(ImpactSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
+	}
+
+	IDamageable* DamageableObject = Cast<IDamageable>(ImpactResult.GetActor());
+	if(DamageableObject)
+	{
+		DamageableObject->AddDamage(ImpactResult.GetActor(), DamageAmount, DamageType, nullptr, this);
+		// UE_LOG(LogTemp, Warning, TEXT("Hit Character : %s , Damage Applied : %f"), , DamageAmount);
+	}
 	
 	Destroy();
 }

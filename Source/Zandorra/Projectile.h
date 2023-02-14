@@ -37,6 +37,9 @@ protected:
 	UFUNCTION()
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
+	UFUNCTION()
+	virtual void OnStop(const FHitResult& ImpactResult);
+	
 	UPROPERTY(EditAnywhere)
 	class UParticleSystem* BarrelFlashParticles;
 	

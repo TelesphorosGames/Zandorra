@@ -21,7 +21,7 @@ AZandorraCharacter::AZandorraCharacter()
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
 	TurnRateGamepad = 50.f;
-
+    
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
