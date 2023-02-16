@@ -19,6 +19,9 @@ public:
 	AMurdockCharacter();
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<class UBoxComponent> ShieldCollisionBox;
+
+	virtual void AddDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser) override;
+	
 	
 protected:
 

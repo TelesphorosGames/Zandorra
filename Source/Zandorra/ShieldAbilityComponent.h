@@ -20,11 +20,19 @@ public:
 	void StartShield();
 	void FinishShield();
 
+	bool GetShieldActive() const {return bShieldActive;}
+
 	UPROPERTY()
 	class AMurdockCharacter* ZCharacter{};
 	
 	UFUNCTION(BlueprintGetter)
 	float GetShieldChargePercentage();
+
+	float GetShieldCharge() const {return ShieldCharge; }
+
+	UFUNCTION()
+	void AdjustShieldCharge(float AmountToAdjustBy, float DeltaTime);
+	
 
 protected:
 	
@@ -53,8 +61,6 @@ protected:
 
 	TObjectPtr<class UAudioComponent> ShieldSoundComponent;
 	
-	UFUNCTION()
-	void AdjustShieldCharge(float AmountToAdjustBy, float DeltaTime);
 	
 
 		

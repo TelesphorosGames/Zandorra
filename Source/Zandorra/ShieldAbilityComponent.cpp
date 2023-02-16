@@ -35,7 +35,15 @@ void UShieldAbilityComponent::TickComponent(float DeltaTime, ELevelTick TickType
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	AdjustShieldCharge(ShieldDrainRate, DeltaTime);
+	if(bShieldActive)
+	{
+		AdjustShieldCharge(ShieldDrainRate, DeltaTime);
+		if(ShieldCharge <= 0)
+		{
+			FinishShield();
+		}
+	}
+	
 
 }
 
@@ -85,7 +93,7 @@ void UShieldAbilityComponent::FinishShield()
 	{
 		ShieldSoundComponent->Deactivate();
 	}
-	if(ZCharacter && ZCharacter->GetMesh()->GetAnimInstance())
+	if(ZCharacter && ZCharacter->GetMesh() && ZCharacter->GetMesh()->GetAnimInstance())
 	{
 		ZCharacter->GetMesh()->GetAnimInstance()->Montage_Play(ZCharacter->GetAttackMontage());
 		ZCharacter->GetMesh()->GetAnimInstance()->Montage_JumpToSection("ShieldFinish", ZCharacter->GetAttackMontage());

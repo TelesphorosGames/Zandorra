@@ -3,6 +3,7 @@
 #include "ZandorraCharacter.h"
 
 #include "CombatComponent.h"
+#include "Enemy.h"
 #include "HealthComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -253,9 +254,7 @@ void AZandorraCharacter::SprintButtonPressed()
 	if(GetCharacterMovement())
 	{
 		CharacterMovementState = ECharacterMovementState::ECMS_Sprinting;
-		GetCharacterMovement()->MaxWalkSpeed = SprintMaxWalkSpeed;
-		
-	
+		GetCharacterMovement()->MaxWalkSpeed = SprintMaxWalkSpeed;	
 	}
 	
 }
@@ -371,6 +370,9 @@ void AZandorraCharacter::LockOnButtonPressed()
 	if(ActorsWithinLockOnRange.Num() == 0)
 	{
 		CurrentlyLockedOnTarget = nullptr;
+		GetCharacterMovement()->bUseControllerDesiredRotation = true;
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+		CharacterMovementState = ECharacterMovementState::ECMS_LockedOn;
 		return;
 	}
 	
@@ -404,6 +406,7 @@ void AZandorraCharacter::LockOnButtonPressed()
 			LockFirstAvailableTarget();
 		}
 	}
+	CurrentlyLockedOnEnemy = Cast<AEnemy>(CurrentlyLockedOnTarget);
 }
 
 void AZandorraCharacter::SetLockOnCameraRotation(float DeltaSeconds)
@@ -416,10 +419,19 @@ void AZandorraCharacter::SetLockOnCameraRotation(float DeltaSeconds)
 
 	
 	const FRotator CurrentCamSpot = GetControlRotation();
-	const FRotator CameraLookAtRotation = UKismetMathLibrary::FindLookAtRotation(FollowCamera->GetComponentLocation(), CurrentlyLockedOnTarget->GetActorLocation());
-	const FRotator InterpToCamSpot = FMath::RInterpTo(CurrentCamSpot, CameraLookAtRotation, DeltaSeconds, 20.f);
+	if(CurrentlyLockedOnEnemy && CurrentlyLockedOnEnemy->GetAlive())
+	{
+		FVector EnemyLocation = CurrentlyLockedOnEnemy->GetMesh()->GetSocketLocation(FName("spine_03"));
+		const FRotator CameraLookAtRotation = UKismetMathLibrary::FindLookAtRotation(FollowCamera->GetComponentLocation(), EnemyLocation);
+		const FRotator InterpToCamSpot = FMath::RInterpTo(CurrentCamSpot, CameraLookAtRotation, DeltaSeconds, 20.f);
+        	
+		Controller->SetControlRotation(InterpToCamSpot);
+	}
+	else
+	{
+		
+	}
 	
-	Controller->SetControlRotation(InterpToCamSpot);
 
 }
 
@@ -454,6 +466,7 @@ void AZandorraCharacter::AddDamage(AActor* DamagedActor, float Damage, const UDa
 	{
 		HealthComponent->AdjustHealth(-Damage);
 	}
+	
 }
 
 

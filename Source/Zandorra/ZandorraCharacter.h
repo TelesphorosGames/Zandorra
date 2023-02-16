@@ -42,7 +42,8 @@ public:
 	 */
 
 	void TakeCharacterDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
-	
+	bool LockOffButtonPressed();
+	void LockOnButtonPressed();
 	
 	/* PUBLIC VARIABLES
 	 */
@@ -57,7 +58,7 @@ public:
 	UPROPERTY()
 	bool bAbilityButtonHeld = false;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class UHealthComponent* HealthComponent;
 	
 	FSetCanFireDelegate SetCanFireDelegate;
@@ -117,10 +118,10 @@ protected:
 
 	virtual void AbilityButtonPressed();
 	virtual void AbilityButtonReleased();
-	bool LockOffButtonPressed();
+
 	void LockFirstAvailableTarget();
 
-	void LockOnButtonPressed();
+
 	void SetLockOnCameraRotation(float DeltaSeconds);
 
 	void InterpFOV(float DeltaTime);
@@ -179,6 +180,8 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	AActor* CurrentlyLockedOnTarget{};
 
+	UPROPERTY(VisibleAnywhere)
+	class AEnemy* CurrentlyLockedOnEnemy{};
 
 	
 private:

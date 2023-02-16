@@ -20,7 +20,9 @@ AEnemy::AEnemy()
 	GetMesh()->SetCollisionObjectType(ECC_SkeletalMesh);
 
 	EnemyHealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("Health Component"));
+	
 	MeleeCombatCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Melee Combat Collision Box"));
+	MeleeCombatCollisionBox->SetupAttachment(GetMesh(), FName("headSocket"));
 
 }
 
@@ -61,7 +63,7 @@ void AEnemy::CycleTargetAfterNoMoreHealth(AActor* KillingChar)
 	AZandorraCharacter* Attacker= Cast<AZandorraCharacter>(KillingChar);
 	if(Attacker)
 	{
-		Attacker->SetCurrentlyLockedOnTarget(nullptr);
+		Attacker->LockOnButtonPressed();
 	}
 }
 
