@@ -33,7 +33,9 @@ public:
 	
 	FORCEINLINE EEnemyMovementStatus GetEnemyMovementStatus(){return EnemyMovementStatus;}
 	FORCEINLINE void SetEnemyMovementStatus(EEnemyMovementStatus Status){EnemyMovementStatus = Status;}
-	FORCEINLINE bool GetAlive() {return bAlive;}
+	
+	UFUNCTION(BlueprintPure)
+	FORCEINLINE bool GetAlive() const {return bAlive;}
 
 protected:
 	virtual void BeginPlay() override;
@@ -50,7 +52,11 @@ protected:
 	EEnemyMovementStatus EnemyMovementStatus = EEnemyMovementStatus::EMS_Idle;
 
 	virtual void AddDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser) override;
-	
+
+	UFUNCTION()
+	void CycleTargetAfterNoMoreHealth(AActor* KillingChar);
+
+	UFUNCTION(BlueprintCallable)
 	virtual void NoMoreHealth(AActor* Causer);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "My Stuff")
@@ -87,7 +93,11 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	virtual void DeathEnd();
 
-	bool bAlive = false;
+	UFUNCTION(BlueprintImplementableEvent)
+	void SetDestroyTimer();
+
+	UPROPERTY()
+	bool bAlive = true;
 	
 
 

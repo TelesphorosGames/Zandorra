@@ -6,7 +6,9 @@
 #include "HealthComponent.h"
 
 #include "Zandorra.h"
+#include "ZandorraCharacter.h"
 #include "Components/BoxComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 AEnemy::AEnemy()
 {
@@ -25,6 +27,8 @@ AEnemy::AEnemy()
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+
+	
 	
 }
 
@@ -44,7 +48,6 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void AEnemy::AddDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy,
 	AActor* DamageCauser)
 {
-	IDamageable::AddDamage(DamagedActor, Damage, DamageType, InstigatedBy, DamageCauser);
 	EnemyHealthComponent->AdjustHealth(-Damage);
 	if(EnemyHealthComponent->Health <= 0.f)
 	{
@@ -53,13 +56,21 @@ void AEnemy::AddDamage(AActor* DamagedActor, float Damage, const UDamageType* Da
 	
 }
 
+void AEnemy::CycleTargetAfterNoMoreHealth(AActor* KillingChar)
+{
+	AZandorraCharacter* Attacker= Cast<AZandorraCharacter>(KillingChar);
+	if(Attacker)
+	{
+		Attacker->SetCurrentlyLockedOnTarget(nullptr);
+	}
+}
+
 void AEnemy::NoMoreHealth(AActor* Causer)
 {
-	if(GetMesh()->GetAnimInstance() && CombatMontage)
-	{
-		GetMesh()->GetAnimInstance()->Montage_Play(CombatMontage);
-		GetMesh()->GetAnimInstance()->Montage_JumpToSection("Death", CombatMontage);
-	}
+	bAlive = false;
+	GetCharacterMovement()->StopMovementImmediately();
+	CycleTargetAfterNoMoreHealth(Causer);
+	SetDestroyTimer();
 	
 }
 

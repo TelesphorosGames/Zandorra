@@ -87,7 +87,7 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
 	IDamageable* DamageableObject = Cast<IDamageable>(OtherActor);
 	if(DamageableObject)
 	{
-		DamageableObject->AddDamage(OtherActor, DamageAmount, DamageType, nullptr, this);
+		DamageableObject->AddDamage(OtherActor, DamageAmount, DamageType, nullptr, GetOwner());
 		// UE_LOG(LogTemp, Warning, TEXT("Hit Character : %s , Damage Applied : %f"), , DamageAmount);
 	}
 	
@@ -117,7 +117,7 @@ void AProjectile::OnStop(const FHitResult& ImpactResult)
 	IDamageable* DamageableObject = Cast<IDamageable>(ImpactResult.GetActor());
 	if(DamageableObject)
 	{
-		DamageableObject->AddDamage(ImpactResult.GetActor(), DamageAmount, DamageType, nullptr, this);
+		DamageableObject->AddDamage(ImpactResult.GetActor(), DamageAmount, DamageType, GetOwner()->GetInstigatorController(), GetOwner());
 		// UE_LOG(LogTemp, Warning, TEXT("Hit Character : %s , Damage Applied : %f"), , DamageAmount);
 	}
 	

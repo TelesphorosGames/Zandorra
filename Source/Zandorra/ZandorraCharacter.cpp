@@ -114,6 +114,11 @@ void AZandorraCharacter::Tick(float DeltaSeconds)
 	{
 		if(CharacterMovementState == ECharacterMovementState::ECMS_LockedOn)
 		{
+			if(CurrentlyLockedOnTarget == nullptr)
+			{
+				LockOnButtonPressed();
+				return;
+			}
 			CrosshairsTarget=CurrentlyLockedOnTarget->GetActorLocation();
 		}
 		else
@@ -365,6 +370,7 @@ void AZandorraCharacter::LockOnButtonPressed()
 	// None? return
 	if(ActorsWithinLockOnRange.Num() == 0)
 	{
+		CurrentlyLockedOnTarget = nullptr;
 		return;
 	}
 	

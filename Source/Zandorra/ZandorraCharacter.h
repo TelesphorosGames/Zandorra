@@ -81,6 +81,8 @@ public:
 
 	UFUNCTION(BlueprintGetter)
 	float GetStaminaPercentage();
+
+	FORCEINLINE void SetCurrentlyLockedOnTarget(AActor* LockedOn) {CurrentlyLockedOnTarget = LockedOn; }
 	
 protected:
 
