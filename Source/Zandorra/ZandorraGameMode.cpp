@@ -12,6 +12,5 @@ AZandorraGameMode::AZandorraGameMode()
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
-
 	
 }

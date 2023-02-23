@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Damageable.h"
 #include "InteractWithCrosshairs.h"
+#include "Possessable.h"
 #include "GameFramework/Character.h"
 
 
@@ -23,7 +24,7 @@ enum class ECharacterMovementState : uint8
 
 
 UCLASS(config=Game)
-class AZandorraCharacter : public ACharacter, public IInteractWithCrosshairs, public IDamageable
+class AZandorraCharacter : public ACharacter, public IInteractWithCrosshairs, public IDamageable, public IPossessable
 {
 	GENERATED_BODY()
 
@@ -121,6 +122,10 @@ protected:
 
 	void LockFirstAvailableTarget();
 
+	virtual void ToggleCharacter();
+
+	virtual void UnPossessed() override;
+
 
 	void SetLockOnCameraRotation(float DeltaSeconds);
 
@@ -183,6 +188,9 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	class AEnemy* CurrentlyLockedOnEnemy{};
 
+	TObjectPtr<AZandorraCharacter> OtherPlayableCharacter;
+
+	
 	
 private:
 

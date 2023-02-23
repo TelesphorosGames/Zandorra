@@ -6,6 +6,7 @@
 #include "HealthComponent.h"
 #include "ShieldAbilityComponent.h"
 #include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 AMurdockCharacter::AMurdockCharacter()
 {
@@ -49,6 +50,13 @@ void AMurdockCharacter::AddDamage(AActor* DamagedActor, float Damage, const UDam
 	}
 }
 
+void AMurdockCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	
+}
+
 void AMurdockCharacter::AbilityButtonPressed()
 {
 	Super::AbilityButtonPressed();
@@ -65,6 +73,12 @@ void AMurdockCharacter::AbilityButtonReleased()
 
 	ShieldAbilityComponent->FinishShield();
 	ShieldCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+}
+
+void AMurdockCharacter::ToggleCharacter()
+{
+	Super::ToggleCharacter();
 	
 }
 

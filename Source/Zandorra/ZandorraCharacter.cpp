@@ -4,6 +4,7 @@
 
 #include "CombatComponent.h"
 #include "Enemy.h"
+#include "FriendlyAIController.h"
 #include "HealthComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -12,7 +13,9 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Zandorra.h"
+#include "ZandorraGameMode.h"
 #include "Components/SphereComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
 AZandorraCharacter::AZandorraCharacter()
@@ -69,6 +72,13 @@ void AZandorraCharacter::BeginPlay()
 	SetCanFireDelegate.BindUFunction(CombatComponent, "SetCanFire");
 
 	GetCharacterMovement()->MaxWalkSpeed = DefaultMaxWalkSpeed;
+
+	AZandorraGameMode* ZandorraGameMode = Cast<AZandorraGameMode>(GetWorld()->GetAuthGameMode());
+	if(ZandorraGameMode)
+	{
+		ZandorraGameMode->PossessableCharacters.Add(this);
+		UE_LOG(LogTemp, Warning, TEXT("Added this to index: %d"), ZandorraGameMode->PossessableCharacters.Find(this));
+	}
 	
 }
 
@@ -103,6 +113,10 @@ void AZandorraCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	PlayerInputComponent->BindAction("Beam", IE_Released, this, &AZandorraCharacter::AbilityButtonReleased);
 
 	PlayerInputComponent->BindAction("LockOn", IE_Pressed, this, &AZandorraCharacter::LockOnButtonPressed);
+	
+	PlayerInputComponent->BindAction("ToggleCharacter", IE_Pressed, this, &AZandorraCharacter::ToggleCharacter);
+
+	
 }
 
 void AZandorraCharacter::Tick(float DeltaSeconds)
@@ -140,6 +154,7 @@ void AZandorraCharacter::PostInitializeComponents()
 	{
 		CombatComponent->ZCharacter = this;
 	}
+	
 }
 
 void AZandorraCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
@@ -356,6 +371,60 @@ void AZandorraCharacter::LockFirstAvailableTarget()
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	
 	UE_LOG(LogTemp, Warning, TEXT("Currently Locked Onto : %s"), *CurrentlyLockedOnTarget->GetName());
+}
+
+void AZandorraCharacter::ToggleCharacter()
+{
+	if(OtherPlayableCharacter == nullptr)
+	{
+		AZandorraGameMode* ZandorraGameMode = Cast<AZandorraGameMode>(GetWorld()->GetAuthGameMode());
+        	if(ZandorraGameMode)
+        	{
+        		if(ZandorraGameMode->PossessableCharacters[0] == this)
+        		{
+        			OtherPlayableCharacter = ZandorraGameMode->PossessableCharacters[1];
+        			UE_LOG(LogTemp,Warning,TEXT("Set OtherPlayable to index [1]"));
+        		}
+        		else if(ZandorraGameMode->PossessableCharacters[1] == this)
+        		{
+        			OtherPlayableCharacter = ZandorraGameMode->PossessableCharacters[0];
+        			UE_LOG(LogTemp,Warning,TEXT("Set OtherPlayable to index [0]"));
+        		}
+        	}
+	}
+	if(OtherPlayableCharacter != nullptr)
+	{
+		
+		GetController()->Possess(OtherPlayableCharacter);
+		
+	}
+	
+	
+}
+
+void AZandorraCharacter::UnPossessed()
+{
+
+	
+	Super::UnPossessed();
+
+	
+
+	AAIController* ZAIController= Cast<AAIController>(GetController());
+	if(ZAIController)
+	{
+		UE_LOG(LogTemp,Warning,TEXT("Called"));
+		AFriendlyAIController* FriendlyAIController = Cast<AFriendlyAIController>(ZAIController);
+		if(FriendlyAIController)
+		{
+			FriendlyAIController->Possess(this);
+        		UE_LOG(LogTemp,Warning,TEXT("Yep, Done"));
+		}
+	}
+	
+
+
+	
 }
 
 void AZandorraCharacter::LockOnButtonPressed()

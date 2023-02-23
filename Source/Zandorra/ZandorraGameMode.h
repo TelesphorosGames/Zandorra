@@ -13,6 +13,10 @@ class AZandorraGameMode : public AGameModeBase
 
 public:
 	AZandorraGameMode();
+
+	TArray<class AZandorraCharacter*> PossessableCharacters;
+
+	
 };
 
 
