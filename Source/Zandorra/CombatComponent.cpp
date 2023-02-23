@@ -129,7 +129,19 @@ void UCombatComponent::SetHudCrosshairs(float DeltaTime)
 
 bool UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 {
-	if(!ZPlayerController || !ZCharacter) return false;
+    if(!ZCharacter) return false;
+    
+	if(!ZPlayerController)
+	{
+		AZandorraGameMode* ZandorraGameMode = Cast<AZandorraGameMode>(GetWorld()->GetAuthGameMode());
+		if(ZandorraGameMode)
+		{
+			ZPlayerController = Cast<AZandorraPlayerController>(ZandorraGameMode->GetPlayableController());
+		}
+	    
+	}
+	 
+	 
 	
 	FVector2D ViewportSize;
 
@@ -249,7 +261,7 @@ void UCombatComponent::FireWeaponPressed(bool bPressed)
 
 void UCombatComponent::AbilityButtonPressed(bool bPressed)
 {
-	SetBackwardsMovementTarget();
+	// SetBackwardsMovementTarget();
 }
 
 void UCombatComponent::LaunchProjectile(const FVector& HitTarget)

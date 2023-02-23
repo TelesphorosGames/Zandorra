@@ -61,7 +61,7 @@ void AEnemy::AddDamage(AActor* DamagedActor, float Damage, const UDamageType* Da
 void AEnemy::CycleTargetAfterNoMoreHealth(AActor* KillingChar)
 {
 	AZandorraCharacter* Attacker= Cast<AZandorraCharacter>(KillingChar);
-	if(Attacker)
+	if(Attacker && Attacker->GetCharacterMovementState() == ECharacterMovementState::ECMS_LockedOn)
 	{
 		Attacker->LockOnButtonPressed();
 	}
@@ -71,6 +71,7 @@ void AEnemy::NoMoreHealth(AActor* Causer)
 {
 	bAlive = false;
 	GetCharacterMovement()->StopMovementImmediately();
+	
 	CycleTargetAfterNoMoreHealth(Causer);
 	SetDestroyTimer();
 	

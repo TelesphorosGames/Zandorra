@@ -90,12 +90,12 @@ void UBeamAttackComponent::StartBeamAttack()
 		FTransform BarrelSocketTransform = BarrelSocket->GetSocketTransform(ZCharacter->GetMesh());
 		FHitResult Result;
 
-		if(ZCharacter->GetVelocity().Size() > 0 && ZCharacter->MoveForwardAxisValue <= -.3f && ZCharacter->GetCharacterMovementState() != ECharacterMovementState::ECMS_LockedOn)
-		{
-			const FVector BarrelEnd = BarrelSocketTransform.GetLocation() + (BarrelSocketTransform.GetUnitAxis(EAxis::X) *5000);
-			WeaponTraceHit(BarrelSocketTransform.GetLocation(), BarrelEnd, Result);
-			return;
-		}
+		// if(ZCharacter->GetVelocity().Size() > 0 && ZCharacter->MoveForwardAxisValue <= -.3f && ZCharacter->GetCharacterMovementState() != ECharacterMovementState::ECMS_LockedOn)
+		// {
+		// 	const FVector BarrelEnd = BarrelSocketTransform.GetLocation() + (BarrelSocketTransform.GetUnitAxis(EAxis::X) *5000);
+		// 	WeaponTraceHit(BarrelSocketTransform.GetLocation(), BarrelEnd, Result);
+		// 	return;
+		// }
 		WeaponTraceHit(BarrelSocketTransform.GetLocation(), ZCharacter->GetCrosshairsTarget(), Result);
 	}
 }

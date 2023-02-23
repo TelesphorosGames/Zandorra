@@ -134,7 +134,12 @@ void AZandorraCharacter::Tick(float DeltaSeconds)
 				LockOnButtonPressed();
 				return;
 			}
-			CrosshairsTarget=CurrentlyLockedOnTarget->GetActorLocation();
+			if(CurrentlyLockedOnEnemy)
+			{
+				CrosshairsTarget=CombatComponent->GetCrosshairsTarget();
+					// CurrentlyLockedOnEnemy->GetMesh()->GetSocketLocation(FName("LockOnLocation"));
+			}
+			
 		}
 		else
 		{
@@ -333,6 +338,9 @@ void AZandorraCharacter::AbilityButtonPressed()
 	if (CombatComponent)
 	{
 		CombatComponent->AbilityButtonPressed(true);
+		GetCharacterMovement()->bUseControllerDesiredRotation = true;
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+		
 	}
 	
 }
@@ -343,6 +351,9 @@ void AZandorraCharacter::AbilityButtonReleased()
 	if (CombatComponent)
 	{
 		CombatComponent->AbilityButtonPressed(false);
+		GetCharacterMovement()->bUseControllerDesiredRotation = false;
+		GetCharacterMovement()->bOrientRotationToMovement = true;
+		
 	}
 }
 
@@ -375,11 +386,14 @@ void AZandorraCharacter::LockFirstAvailableTarget()
 
 void AZandorraCharacter::ToggleCharacter()
 {
-		AZandorraGameMode* ZandorraGameMode = Cast<AZandorraGameMode>(GetWorld()->GetAuthGameMode());
-        	if(ZandorraGameMode)
-        	{
-        		ZandorraGameMode->SwitchControlledCharacters();
-        	}
+	AZandorraGameMode* ZandorraGameMode = Cast<AZandorraGameMode>(GetWorld()->GetAuthGameMode());
+    if(ZandorraGameMode)
+    {
+        ZandorraGameMode->SwitchControlledCharacters();
+    }
+	AbilityButtonReleased();
+	
+		
 }
 
 void AZandorraCharacter::UnPossessed()
@@ -413,6 +427,7 @@ void AZandorraCharacter::LockOnButtonPressed()
 		{
 			LockFirstAvailableTarget();
 		}
+		if(ActorsWithinLockOnRange.Num() < LockedOnActorIndex) return;
 		// If We are currently locked onto the correct index of the actor in the 'within range' array, increase the index cound and lock on to the next actor
 		if(ActorsWithinLockOnRange[LockedOnActorIndex] == CurrentlyLockedOnTarget)
 		{
@@ -450,7 +465,7 @@ void AZandorraCharacter::SetLockOnCameraRotation(float DeltaSeconds)
 	const FRotator CurrentCamSpot = GetControlRotation();
 	if(CurrentlyLockedOnEnemy && CurrentlyLockedOnEnemy->GetAlive())
 	{
-		FVector EnemyLocation = CurrentlyLockedOnEnemy->GetMesh()->GetSocketLocation(FName("spine_03"));
+		FVector EnemyLocation = CurrentlyLockedOnEnemy->GetMesh()->GetSocketLocation(FName("LockOnLocation"));
 		const FRotator CameraLookAtRotation = UKismetMathLibrary::FindLookAtRotation(FollowCamera->GetComponentLocation(), EnemyLocation);
 		const FRotator InterpToCamSpot = FMath::RInterpTo(CurrentCamSpot, CameraLookAtRotation, DeltaSeconds, 20.f);
         	
