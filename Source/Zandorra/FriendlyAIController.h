@@ -13,5 +13,8 @@ UCLASS()
 class ZANDORRA_API AFriendlyAIController : public AAIController
 {
 	GENERATED_BODY()
+
+public:
+	virtual void BeginPlay() override;
 	
 };

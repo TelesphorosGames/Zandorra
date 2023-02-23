@@ -16,6 +16,7 @@
 #include "Kismet/GameplayStatics.h"
 
 #include "Zandorra.h"
+#include "ZandorraGameMode.h"
 
 UCombatComponent::UCombatComponent()
 {
@@ -46,12 +47,17 @@ void UCombatComponent::BeginPlay()
 	}
 	if (ZCharacter)
 	{
-		ZPlayerController = Cast<AZandorraPlayerController>(ZCharacter->GetLocalViewingPlayerController());
-		if(ZPlayerController)
+		AZandorraGameMode* ZandorraGameMode = Cast<AZandorraGameMode>(GetWorld()->GetAuthGameMode());
+		if(ZandorraGameMode)
 		{
-			ZHud = Cast<AZandorraHud>(ZPlayerController->GetHUD());
-			UE_LOG(LogTemp, Warning, TEXT("%s"), *ZPlayerController->GetName());
+			ZPlayerController = Cast<AZandorraPlayerController>(ZandorraGameMode->GetPlayableController());
+            		if(ZPlayerController)
+            		{
+            			ZHud = Cast<AZandorraHud>(ZPlayerController->GetHUD());
+            			UE_LOG(LogTemp, Warning, TEXT("%s"), *ZPlayerController->GetName());
+            		}
 		}
+		
 	}
 	const USkeletalMeshSocket* BarrelSocket = ZCharacter->GetMesh()->GetSocketByName("Barrel");
 	if(BarrelSocket)
@@ -150,7 +156,9 @@ bool UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		if(ZCharacter)
 		{
 			const float DistanceToCharacter = (ZCharacter->GetActorLocation() - Start).Size();
-			Start+=CrosshairWorldDirection * (DistanceToCharacter + 30.f);
+
+			// Ensure that the line trace starts a bit in front of character to amount for wacky ik results
+			Start+=CrosshairWorldDirection * (DistanceToCharacter + 80.f);
 			// DrawDebugSphere(GetWorld(),Start, 16.f, 12, FColor::Red);
 		}
 		
@@ -204,7 +212,7 @@ bool UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		CrosshairsTarget =TraceHitResult.TraceEnd;
 		return true;
 	}
-	
+	UE_LOG(LogTemp,Warning,TEXT("BScreenToWorld FaileD!"));
 	return false;
 }
 

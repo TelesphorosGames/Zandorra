@@ -188,10 +188,6 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	class AEnemy* CurrentlyLockedOnEnemy{};
 
-	TObjectPtr<AZandorraCharacter> OtherPlayableCharacter;
-
-	
-	
 private:
 
 	

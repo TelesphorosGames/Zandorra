@@ -1,6 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "ZandorraGameMode.h"
+
+#include "FriendlyAIController.h"
 #include "ZandorraCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -12,5 +14,26 @@ AZandorraGameMode::AZandorraGameMode()
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
-	
+}
+
+void AZandorraGameMode::SwitchControlledCharacters()
+{
+	PlayableController->UnPossess();
+	FriendlyAIController->UnPossess();
+	if(bWasControllingCharacterZero)
+	{
+		{
+			PlayableController->Possess(PossessableCharacters[1]);
+			bWasControllingCharacterZero = false;
+			FriendlyAIController->Possess(PossessableCharacters[0]);
+		}
+	}
+	else
+	{
+		{
+			PlayableController->Possess(PossessableCharacters[0]);
+			bWasControllingCharacterZero = true;
+			FriendlyAIController->Possess(PossessableCharacters[1]);
+		}
+	}
 }

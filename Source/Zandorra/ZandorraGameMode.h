@@ -6,6 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "ZandorraGameMode.generated.h"
 
+class AFriendlyAIController;
 UCLASS(minimalapi)
 class AZandorraGameMode : public AGameModeBase
 {
@@ -16,6 +17,19 @@ public:
 
 	TArray<class AZandorraCharacter*> PossessableCharacters;
 
+	FORCEINLINE void SetPlayerController(AController* InController) {PlayableController = InController; }
+	FORCEINLINE void SetAIController(AFriendlyAIController* InAIController) {FriendlyAIController = InAIController; }
+
+	FORCEINLINE AController* GetPlayableController() const {return PlayableController; }
+	void SwitchControlledCharacters();
+
+private:
+	
+	TObjectPtr<AController> PlayableController;
+
+	TObjectPtr<class AFriendlyAIController> FriendlyAIController;
+
+	bool bWasControllingCharacterZero = true;
 	
 };
 
