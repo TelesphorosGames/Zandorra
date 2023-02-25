@@ -170,7 +170,7 @@ bool UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 			const float DistanceToCharacter = (ZCharacter->GetActorLocation() - Start).Size();
 
 			// Ensure that the line trace starts a bit in front of character to amount for wacky ik results
-			Start+=CrosshairWorldDirection * (DistanceToCharacter + 80.f);
+			Start+=CrosshairWorldDirection * (DistanceToCharacter + 20.f);
 			// DrawDebugSphere(GetWorld(),Start, 16.f, 12, FColor::Red);
 		}
 		

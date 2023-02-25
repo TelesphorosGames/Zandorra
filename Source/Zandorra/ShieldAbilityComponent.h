@@ -23,7 +23,7 @@ public:
 	bool GetShieldActive() const {return bShieldActive;}
 
 	UPROPERTY()
-	class AMurdockCharacter* ZCharacter{};
+	TObjectPtr<class AMurdockCharacter> ZCharacter{};
 	
 	UFUNCTION(BlueprintGetter)
 	float GetShieldChargePercentage();
