@@ -3,6 +3,7 @@
 
 #include "BeamAttackComponent.h"
 
+#include "Zandorra.h"
 #include "ZandorraCharacter.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
@@ -127,7 +128,7 @@ void UBeamAttackComponent::WeaponTraceHit(const FVector& TraceStart, const FVect
 			OutHit,
 			TraceStart,
 			End, 
-			ECollisionChannel::ECC_Visibility
+			ECC_Visibility
 			);
 
 		FVector BeamEnd = End;
@@ -145,6 +146,7 @@ void UBeamAttackComponent::WeaponTraceHit(const FVector& TraceStart, const FVect
 				DamageableObject->AddDamage(OutHit.GetActor(), BeamDamageAmount, DamageType, nullptr, GetOwner());
 				UE_LOG(LogTemp, Warning, TEXT("Hit Character : %s , Damage Applied : %f"), *OutHit.GetActor()->GetName(), BeamDamageAmount);
 			}
+			
 		}
 		
 		// DrawDebugSphere(GetWorld(), BeamEnd, 16.f, 12, FColor::Magenta, false, -1);
