@@ -467,7 +467,7 @@ void AZandorraCharacter::SetLockOnCameraRotation(float DeltaSeconds)
 	{
 		FVector EnemyLocation = CurrentlyLockedOnEnemy->GetMesh()->GetSocketLocation(FName("LockOnLocation"));
 		const FRotator CameraLookAtRotation = UKismetMathLibrary::FindLookAtRotation(FollowCamera->GetComponentLocation(), EnemyLocation);
-		const FRotator InterpToCamSpot = FMath::RInterpTo(CurrentCamSpot, CameraLookAtRotation, DeltaSeconds, 20.f);
+		const FRotator InterpToCamSpot = FMath::RInterpTo(CurrentCamSpot, CameraLookAtRotation, DeltaSeconds, 2.f);
         	
 		Controller->SetControlRotation(InterpToCamSpot);
 	}

@@ -16,5 +16,7 @@ class ZANDORRA_API AFriendlyAIController : public AAIController
 
 public:
 	virtual void BeginPlay() override;
+
+	
 	
 };

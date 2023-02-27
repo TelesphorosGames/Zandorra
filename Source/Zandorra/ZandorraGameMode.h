@@ -20,11 +20,16 @@ public:
 	FORCEINLINE void SetPlayerController(AController* InController) {PlayableController = InController; }
 	FORCEINLINE void SetAIController(AFriendlyAIController* InAIController) {FriendlyAIController = InAIController; }
 
+	UFUNCTION(BlueprintPure)
 	FORCEINLINE AController* GetPlayableController() const {return PlayableController; }
+	UFUNCTION(BlueprintPure)
+	FORCEINLINE AFriendlyAIController* GetFriendlyAIController() const {return FriendlyAIController; }
+
+	UFUNCTION()
 	void SwitchControlledCharacters();
 
 private:
-	
+
 	TObjectPtr<AController> PlayableController;
 
 	TObjectPtr<class AFriendlyAIController> FriendlyAIController;
