@@ -143,7 +143,7 @@ void AZandorraCharacter::Tick(float DeltaSeconds)
 		}
 		else
 		{
-			CrosshairsTarget=CombatComponent->GetCrosshairsTarget();
+			CrosshairsTarget = CombatComponent->GetCrosshairsTarget();
 		}
 	}
 
@@ -415,7 +415,6 @@ void AZandorraCharacter::LockOnButtonPressed()
 		CurrentlyLockedOnTarget = nullptr;
 		GetCharacterMovement()->bUseControllerDesiredRotation = true;
 		GetCharacterMovement()->bOrientRotationToMovement = false;
-		CharacterMovementState = ECharacterMovementState::ECMS_LockedOn;
 		return;
 	}
 	
@@ -471,7 +470,7 @@ void AZandorraCharacter::SetLockOnCameraRotation(float DeltaSeconds)
         	
 		Controller->SetControlRotation(InterpToCamSpot);
 	}
-	else
+	else if(!CurrentlyLockedOnEnemy)
 	{
 		
 	}

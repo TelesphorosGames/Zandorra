@@ -151,7 +151,6 @@ bool UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 	}
 
 	const FVector2D CrosshairLocation = {ViewportSize.X / 2.f , ViewportSize.Y/2.f };
-	FVector CrosshairWorldPostition;
 	FVector CrosshairWorldDirection;
 
 	const bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(
