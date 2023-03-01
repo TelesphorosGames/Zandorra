@@ -4,3 +4,7 @@
 #include "InteractWithCrosshairs.h"
 
 // Add default functionality here for any IInteractWithCrosshairs functions that are not pure virtual.
+bool IInteractWithCrosshairs::InteractWith(AActor* ActorToInteractWith)
+{
+	return false;
+}

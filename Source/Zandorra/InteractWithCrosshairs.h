@@ -22,4 +22,7 @@ class ZANDORRA_API IInteractWithCrosshairs
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
+
+	virtual bool InteractWith(AActor* ActorToInteractWith);
+	
 };

@@ -11,6 +11,7 @@
 
 DECLARE_DELEGATE_OneParam(FSetCanFireDelegate, bool);
 
+
 UENUM(BlueprintType)
 enum class ECharacterMovementState : uint8
 {
@@ -45,6 +46,12 @@ public:
 	void TakeCharacterDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 	bool LockOffButtonPressed();
 	void LockOnButtonPressed();
+
+	void InteractButtonPressed();
+
+	UFUNCTION(BlueprintCallable)
+	bool CheckInteractable(AActor* ActorToInteractWith);
+	
 	
 	/* PUBLIC VARIABLES
 	 */
@@ -131,6 +138,11 @@ protected:
 
 	void InterpFOV(float DeltaTime);
 
+	void OnInteractableSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BeginInteractableSphereTrace();
+
 
 	/* PROTECTED VARIABLES
 	 */
@@ -177,6 +189,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	class USphereComponent* DamageableDetectionSphere{};
 
+	TObjectPtr<USphereComponent> InteractableRangeSphere;
+
 	UPROPERTY(VisibleAnywhere)
 	TArray<AActor*> ActorsWithinLockOnRange{};
 
@@ -188,11 +202,16 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	class AEnemy* CurrentlyLockedOnEnemy{};
 
+	UPROPERTY(BlueprintReadWrite)
+	TObjectPtr<AActor> ActorToInteractWithPtr;
+
 private:
 
 	
 	
 };
+
+
 
 
 

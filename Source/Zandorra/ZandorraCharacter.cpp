@@ -60,6 +60,9 @@ AZandorraCharacter::AZandorraCharacter()
 
 	DamageableDetectionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("DamageableDetectionSphere"));
 	DamageableDetectionSphere->SetupAttachment(RootComponent);
+
+	InteractableRangeSphere = CreateDefaultSubobject<USphereComponent>(TEXT("InteractableRangeSphere"));
+	InteractableRangeSphere->SetupAttachment(RootComponent);
 	
 }
 
@@ -68,6 +71,7 @@ void AZandorraCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	OnTakeAnyDamage.AddDynamic(this, &AZandorraCharacter::AddDamage);
+	InteractableRangeSphere->OnComponentBeginOverlap.AddDynamic(this, &AZandorraCharacter::OnInteractableSphereOverlap);
 	SetCanFireDelegate.BindUFunction(CombatComponent, "SetCanFire");
 
 	GetCharacterMovement()->MaxWalkSpeed = DefaultMaxWalkSpeed;
@@ -116,6 +120,7 @@ void AZandorraCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	
 	PlayerInputComponent->BindAction("ToggleCharacter", IE_Pressed, this, &AZandorraCharacter::ToggleCharacter);
 
+	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AZandorraCharacter::InteractButtonPressed);
 	
 }
 
@@ -286,7 +291,6 @@ void AZandorraCharacter::SprintButtonReleased()
 		CharacterMovementState = ECharacterMovementState::ECMS_Idle;
 		GetCharacterMovement()->MaxWalkSpeed = DefaultMaxWalkSpeed;
 		CurrentlyLockedOnTarget = nullptr;
-		
 	}
 }
 
@@ -452,6 +456,23 @@ void AZandorraCharacter::LockOnButtonPressed()
 	CurrentlyLockedOnEnemy = Cast<AEnemy>(CurrentlyLockedOnTarget);
 }
 
+void AZandorraCharacter::InteractButtonPressed()
+{
+	CheckInteractable(ActorToInteractWithPtr);
+	
+}
+
+bool AZandorraCharacter::CheckInteractable(AActor* ActorToInteractWith)
+{
+	IInteractWithCrosshairs* Interactable = Cast<IInteractWithCrosshairs>(ActorToInteractWith);
+	if(Interactable)
+	{
+		Interactable->InteractWith(ActorToInteractWith);
+		return true;
+	}
+	return false;
+}
+
 void AZandorraCharacter::SetLockOnCameraRotation(float DeltaSeconds)
 {
 	// FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), CurrentlyLockedOnTarget->GetActorLocation());
@@ -512,6 +533,11 @@ void AZandorraCharacter::AddDamage(AActor* DamagedActor, float Damage, const UDa
 	
 }
 
+void AZandorraCharacter::OnInteractableSphereOverlap(UPrimitiveComponent* OverlappedComponent,
+	AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+	const FHitResult& SweepResult)
+{
+}
 
 
 // if(ActorsWithinLockOnRange.Num()==1)
