@@ -35,15 +35,15 @@ void UShieldAbilityComponent::TickComponent(float DeltaTime, ELevelTick TickType
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if(bShieldActive)
-	{
-		AdjustShieldCharge(ShieldDrainRate, DeltaTime);
-		if(ShieldCharge <= 0)
-		{
-			FinishShield();
-		}
-	}
-	
+	// if(bShieldActive)
+	// {
+	// 	AdjustShieldCharge(ShieldDrainRate, DeltaTime);
+	// 	if(ShieldCharge <= 0)
+	// 	{
+	// 		FinishShield();
+	// 	}
+	// }
+	//
 
 }
 

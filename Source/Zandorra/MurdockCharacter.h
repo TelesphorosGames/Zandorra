@@ -17,6 +17,7 @@ class ZANDORRA_API AMurdockCharacter : public AZandorraCharacter
 public:
 
 	AMurdockCharacter();
+	
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<class UBoxComponent> ShieldCollisionBox;
 
