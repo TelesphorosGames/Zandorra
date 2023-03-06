@@ -38,7 +38,4 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	TObjectPtr<class UShieldAbilityComponent> ShieldAbilityComponent;
 	
-	
-	
-		
 };
